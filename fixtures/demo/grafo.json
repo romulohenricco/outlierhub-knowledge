@@ -1,0 +1,246 @@
+{
+  "nodes": [
+    {
+      "id": "livro:guia-knowledge.pdf",
+      "label": "Seu primeiro Knowledge",
+      "tipo": "livro"
+    },
+    {
+      "id": "livro:organizar-fontes.pdf",
+      "label": "Organizar fontes com contexto",
+      "tipo": "livro"
+    },
+    {
+      "id": "livro:perguntas-e-conexoes.pdf",
+      "label": "Perguntas e conexões",
+      "tipo": "livro"
+    },
+    {
+      "id": "livro:projeto-em-acao.pdf",
+      "label": "Um projeto em ação",
+      "tipo": "livro"
+    },
+    {
+      "id": "livro:conteudo-com-clareza.pdf",
+      "label": "Conteúdo com clareza",
+      "tipo": "livro"
+    },
+    {
+      "id": "captura",
+      "label": "Captura de ideias",
+      "tipo": "conceito"
+    },
+    {
+      "id": "revisao",
+      "label": "Revisão",
+      "tipo": "conceito"
+    },
+    {
+      "id": "decisao",
+      "label": "Decisão",
+      "tipo": "conceito"
+    },
+    {
+      "id": "fontes",
+      "label": "Fontes",
+      "tipo": "conceito"
+    },
+    {
+      "id": "contexto",
+      "label": "Contexto",
+      "tipo": "conceito"
+    },
+    {
+      "id": "perguntas",
+      "label": "Perguntas",
+      "tipo": "conceito"
+    },
+    {
+      "id": "entrega",
+      "label": "Entrega",
+      "tipo": "conceito"
+    }
+  ],
+  "edges": [
+    {
+      "id": 1,
+      "src": "livro:guia-knowledge.pdf",
+      "rel": "aborda",
+      "dst": "captura",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 2,
+      "src": "livro:guia-knowledge.pdf",
+      "rel": "aborda",
+      "dst": "revisao",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 3,
+      "src": "livro:guia-knowledge.pdf",
+      "rel": "aborda",
+      "dst": "decisao",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 4,
+      "src": "livro:organizar-fontes.pdf",
+      "rel": "aborda",
+      "dst": "fontes",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 5,
+      "src": "livro:organizar-fontes.pdf",
+      "rel": "aborda",
+      "dst": "contexto",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 6,
+      "src": "livro:organizar-fontes.pdf",
+      "rel": "aborda",
+      "dst": "revisao",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 7,
+      "src": "livro:perguntas-e-conexoes.pdf",
+      "rel": "aborda",
+      "dst": "perguntas",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 8,
+      "src": "livro:perguntas-e-conexoes.pdf",
+      "rel": "aborda",
+      "dst": "fontes",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 9,
+      "src": "livro:perguntas-e-conexoes.pdf",
+      "rel": "aborda",
+      "dst": "contexto",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 10,
+      "src": "livro:projeto-em-acao.pdf",
+      "rel": "aborda",
+      "dst": "decisao",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 11,
+      "src": "livro:projeto-em-acao.pdf",
+      "rel": "aborda",
+      "dst": "revisao",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 12,
+      "src": "livro:projeto-em-acao.pdf",
+      "rel": "aborda",
+      "dst": "entrega",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 13,
+      "src": "livro:conteudo-com-clareza.pdf",
+      "rel": "aborda",
+      "dst": "perguntas",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 14,
+      "src": "livro:conteudo-com-clareza.pdf",
+      "rel": "aborda",
+      "dst": "fontes",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 15,
+      "src": "livro:conteudo-com-clareza.pdf",
+      "rel": "aborda",
+      "dst": "entrega",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 16,
+      "src": "captura",
+      "rel": "preserva",
+      "dst": "contexto",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 17,
+      "src": "fontes",
+      "rel": "orientam",
+      "dst": "decisao",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 18,
+      "src": "perguntas",
+      "rel": "conduzem",
+      "dst": "revisao",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 19,
+      "src": "decisao",
+      "rel": "orienta",
+      "dst": "entrega",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    },
+    {
+      "id": 20,
+      "src": "revisao",
+      "rel": "confere",
+      "dst": "fontes",
+      "status": "confirmed",
+      "n_fontes": 1,
+      "peso": 0.8
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+# dependências
+/node_modules
+/.pnp
+.pnp.*
+
+# testes
+/coverage
+**/__pycache__/
+
+# next.js
+/.next/
+/.next-build/
+/out/
+
+# produção
+/build
+
+# misc
+.DS_Store
+# rascunho local (por exemplo, anotações de sessões de agentes de código)
+/tmp/
+/.tmp/
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+
+# variáveis de ambiente (NUNCA versionar; só o .env.example vai pro repositório)
+.env*
+!.env.example
+
+# cache de plataformas de deploy
+.vercel
+.wrangler/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# sidecars gerados (precompute — não versionar)
+**/.thumbs/
+graph-layout.json
+
+# dados locais do usuário (catálogo, corpus, ingestões) — nunca versionar
+/data/
+
+# worktrees de agentes de código
+/.claude/worktrees/

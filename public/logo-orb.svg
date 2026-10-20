@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-label="Knowledge">
+  <defs>
+    <radialGradient id="orb" cx="30%" cy="25%" r="80%">
+      <stop stop-color="#e8f5ff"/>
+      <stop offset=".4" stop-color="#72b8ee"/>
+      <stop offset="1" stop-color="#223f72"/>
+    </radialGradient>
+  </defs>
+  <circle cx="40" cy="40" r="38" fill="url(#orb)"/>
+  <g fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="2">
+    <path d="M19 49 34 25 59 34 47 59 19 49 59 34M34 25l13 34"/>
+  </g>
+  <g fill="#fff"><circle cx="19" cy="49" r="3"/><circle cx="34" cy="25" r="3"/><circle cx="59" cy="34" r="3"/><circle cx="47" cy="59" r="3"/></g>
+</svg>

@@ -1,0 +1,17 @@
+#!/bin/sh
+# Páginas do template: não apaga pagina/* no remoto (docs/paginas.md).
+# Entrada (stdin): <ref local> <sha local> <ref remota> <sha remoto>; apagar = sha local só de zeros.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/pagina/*)
+      case "$local_sha" in
+        *[!0]*) ;;
+        *)
+          echo "BLOQUEADO: '${remote_ref#refs/heads/}' é a branch de uma página do template e não pode ser apagada no remoto (docs/paginas.md)." >&2
+          exit 1
+          ;;
+      esac
+      ;;
+  esac
+done
+exit 0

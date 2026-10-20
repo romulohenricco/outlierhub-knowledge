@@ -1,0 +1,52 @@
+[
+  {
+    "id": "guia-knowledge",
+    "titulo": "Seu primeiro Knowledge",
+    "tema": "conhecimento",
+    "dominio": "conhecimento",
+    "resumo": "Um percurso para capturar uma ideia, registrar sua origem e conectar conhecimento a uma decisão. Inclui revisão semanal da biblioteca.",
+    "arquivo": "guia-knowledge.pdf",
+    "formato": "pdf",
+    "paginas": 2
+  },
+  {
+    "id": "organizar-fontes",
+    "titulo": "Organizar fontes com contexto",
+    "tema": "conhecimento",
+    "dominio": "conhecimento",
+    "resumo": "Como organizar fontes, registrar autoria e permissões, distinguir evidência de interpretação e preparar uma revisão de referências.",
+    "arquivo": "organizar-fontes.pdf",
+    "formato": "pdf",
+    "paginas": 2
+  },
+  {
+    "id": "perguntas-e-conexoes",
+    "titulo": "Perguntas e conexões",
+    "tema": "conhecimento",
+    "dominio": "conhecimento",
+    "resumo": "Perguntas para ligar conceitos no grafo, comparar fontes e registrar uma hipótese sem confundir conexão com comprovação.",
+    "arquivo": "perguntas-e-conexoes.pdf",
+    "formato": "pdf",
+    "paginas": 2
+  },
+  {
+    "id": "projeto-em-acao",
+    "titulo": "Um projeto em ação",
+    "tema": "projetos",
+    "dominio": "projetos",
+    "resumo": "Planejamento de projetos com resultado observável, decisão registrada, tarefas pequenas e revisão do trabalho no kanban.",
+    "arquivo": "projeto-em-acao.pdf",
+    "formato": "pdf",
+    "paginas": 2
+  },
+  {
+    "id": "conteudo-com-clareza",
+    "titulo": "Conteúdo com clareza",
+    "tema": "conteudo",
+    "dominio": "conteudo",
+    "resumo": "Um roteiro para escrever conteúdo claro: pergunta do leitor, exemplo concreto, fontes identificadas e revisão antes da entrega.",
+    "arquivo": "conteudo-com-clareza.pdf",
+    "formato": "pdf",
+    "paginas": 2
+  }
+]

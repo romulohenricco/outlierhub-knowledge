@@ -1,0 +1,167 @@
+[
+  {
+    "code": "demo001",
+    "user": "conta-demo-1",
+    "caption": "3 formas de proteger seu foco antes das 10h",
+    "igUrl": "https://example.invalid/p/demo001/",
+    "videoIdx": [
+      1
+    ],
+    "colecoes": [
+      "produtividade"
+    ]
+  },
+  {
+    "code": "demo002",
+    "user": "conta-demo-2",
+    "caption": "O hábito que mais mudou minha rotina esse ano",
+    "igUrl": "https://example.invalid/p/demo002/",
+    "videoIdx": [],
+    "colecoes": [
+      "hábitos",
+      "mentalidade"
+    ]
+  },
+  {
+    "code": "demo003",
+    "user": "conta-demo-3",
+    "caption": "Como eu organizo minhas notas em rede",
+    "igUrl": "https://example.invalid/p/demo003/",
+    "videoIdx": [],
+    "colecoes": [
+      "mentalidade"
+    ]
+  },
+  {
+    "code": "demo004",
+    "user": "conta-demo-4",
+    "caption": "Checklist rápido antes de qualquer decisão grande",
+    "igUrl": "https://example.invalid/p/demo004/",
+    "videoIdx": [],
+    "colecoes": [
+      "sistemas",
+      "aprendizagem"
+    ]
+  },
+  {
+    "code": "demo005",
+    "user": "conta-demo-5",
+    "caption": "Por que sistemas simples vencem planos perfeitos",
+    "igUrl": "https://example.invalid/p/demo005/",
+    "videoIdx": [
+      1
+    ],
+    "colecoes": [
+      "aprendizagem"
+    ]
+  },
+  {
+    "code": "demo006",
+    "user": "conta-demo-1",
+    "caption": "Meu ritual de início de trabalho profundo",
+    "igUrl": "https://example.invalid/p/demo006/",
+    "videoIdx": [],
+    "colecoes": [
+      "produtividade",
+      "hábitos"
+    ]
+  },
+  {
+    "code": "demo007",
+    "user": "conta-demo-2",
+    "caption": "O que aprendi revisando minhas metas toda semana",
+    "igUrl": "https://example.invalid/p/demo007/",
+    "videoIdx": [],
+    "colecoes": [
+      "hábitos"
+    ]
+  },
+  {
+    "code": "demo008",
+    "user": "conta-demo-3",
+    "caption": "Repetição espaçada explicada em 60 segundos",
+    "igUrl": "https://example.invalid/p/demo008/",
+    "videoIdx": [],
+    "colecoes": [
+      "mentalidade",
+      "sistemas"
+    ]
+  },
+  {
+    "code": "demo009",
+    "user": "conta-demo-4",
+    "caption": "Como eu decido o que NÃO fazer",
+    "igUrl": "https://example.invalid/p/demo009/",
+    "videoIdx": [
+      1
+    ],
+    "colecoes": [
+      "sistemas"
+    ]
+  },
+  {
+    "code": "demo010",
+    "user": "conta-demo-5",
+    "caption": "Um mapa mental da minha rede de ideias",
+    "igUrl": "https://example.invalid/p/demo010/",
+    "videoIdx": [],
+    "colecoes": [
+      "aprendizagem",
+      "produtividade"
+    ]
+  },
+  {
+    "code": "demo011",
+    "user": "conta-demo-1",
+    "caption": "Pré-mortem: o exercício que evita erro caro",
+    "igUrl": "https://example.invalid/p/demo011/",
+    "videoIdx": [],
+    "colecoes": [
+      "produtividade"
+    ]
+  },
+  {
+    "code": "demo012",
+    "user": "conta-demo-2",
+    "caption": "Empilhando hábitos pequenos até virar rotina",
+    "igUrl": "https://example.invalid/p/demo012/",
+    "videoIdx": [],
+    "colecoes": [
+      "hábitos",
+      "mentalidade"
+    ]
+  },
+  {
+    "code": "demo013",
+    "user": "conta-demo-3",
+    "caption": "A diferença entre ruído e sinal na sua agenda",
+    "igUrl": "https://example.invalid/p/demo013/",
+    "videoIdx": [
+      1
+    ],
+    "colecoes": [
+      "mentalidade"
+    ]
+  },
+  {
+    "code": "demo014",
+    "user": "conta-demo-4",
+    "caption": "Como reduzo escopo antes de começar qualquer projeto",
+    "igUrl": "https://example.invalid/p/demo014/",
+    "videoIdx": [],
+    "colecoes": [
+      "sistemas",
+      "aprendizagem"
+    ]
+  },
+  {
+    "code": "demo015",
+    "user": "conta-demo-5",
+    "caption": "Feedback imediato: o atalho pra aprender mais rápido",
+    "igUrl": "https://example.invalid/p/demo015/",
+    "videoIdx": [],
+    "colecoes": [
+      "aprendizagem"
+    ]
+  }
+]

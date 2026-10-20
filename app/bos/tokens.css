@@ -1,0 +1,236 @@
+/* ============================================================
+   Design System v2.0 — Design Tokens
+   Single source of truth for ALL custom properties.
+   Prefix: --bl-
+   ============================================================ */
+
+:root {
+  /* ── Background Scale ── */
+  --bl-bg-0: #030303;
+  --bl-bg-1: #050505;
+  --bl-bg-2: #09090c;
+  --bl-bg-3: #0c0c0e;
+  --bl-bg-4: #0f0f14;
+  --bl-bg-5: #18181b;
+
+  /* ── Background Semantic ── */
+  --bl-bg-primary:    #09090c;
+  --bl-bg-elevated:   #0f0f14;
+  --bl-bg-surface:    #0F0F11;
+  --bl-bg-surface-alt:#1C1E19;
+  --bl-bg-card:       rgba(17, 17, 20, 0.35);
+  --bl-bg-card-solid: rgba(28, 28, 30, 0.65);
+  --bl-bg-card-hover: rgba(35, 35, 38, 0.75);
+  --bl-bg-input:      #131316;
+
+  /* ── Foreground / Text ── */
+  --bl-text-primary:  #f4f4e8;
+  --bl-text-secondary:#a1a1aa;
+  --bl-text-dim:      #71717a;
+  --bl-text-muted:    #52525b;
+  --bl-text-ghost:    #3f3f46;
+
+  /* ── Brand ── */
+  --bl-green:         #6bc950;
+  --bl-green-dim:     rgba(107, 201, 80, 0.15);
+  --bl-green-glow:    rgba(107, 201, 80, 0.25);
+  --bl-green-soft:    rgba(107, 201, 80, 0.08);
+  --bl-green-rgb:     107, 201, 80;
+
+  /* ── Brand Green Scale ── */
+  --bl-green-100: #CCFFE1;
+  --bl-green-200: #99FFc4;
+  --bl-green-300: #5CFF9D;
+  --bl-green-400: #33E87B;
+  --bl-green-500: #6bc950;
+  --bl-green-600: #00B848;
+  --bl-green-700: #009038;
+  --bl-green-800: #006828;
+  --bl-green-900: #004018;
+
+  /* ── Dynamic Accent (defaults to green) ── */
+  --bl-accent:        var(--bl-green);
+  --bl-accent-dim:    var(--bl-green-dim);
+  --bl-accent-glow:   var(--bl-green-glow);
+  --bl-accent-rgb:    107, 201, 80;
+
+  /* ── Semantic Colors ── */
+  --bl-blue:          #60a5fa;
+  --bl-blue-bright:   #0099FF;
+  --bl-purple:        #a855f7;
+  --bl-orange:        #fb923c;
+  --bl-red:           #ef4444;
+  --bl-cyan:          #06b6d4;
+  --bl-yellow:        #fbbf24;
+  --bl-pink:          #ec4899;
+  --bl-gold:          #D4A853;
+  --bl-emerald:       #34c759;
+  --bl-indigo:        #6366f1;
+  --bl-violet:        #7c3aed;
+  --bl-amber:         #d97706;
+  --bl-teal:          #059669;
+  --bl-rose:          #ec4899;
+  --bl-gray:          #6b7280;
+
+  /* ── Status Colors ── */
+  --bl-success: #6bc950;
+  --bl-info:    #60a5fa;
+  --bl-warning: #fbbf24;
+  --bl-danger:  #ef4444;
+
+  /* ── Borders (numeric tiers) ── */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  /* ── Borders (semantic) ── */
+  --bl-border:        rgba(255, 255, 255, 0.06);
+  --bl-border-hover:  rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(107, 201, 80, 0.2);
+
+  /* ── Shadows ── */
+  --bl-shadow-xs:     0 1px 2px rgba(0, 0, 0, 0.3);
+  --bl-shadow-sm:     0 2px 4px rgba(0, 0, 0, 0.35);
+  --bl-shadow-md:     0 4px 12px rgba(0, 0, 0, 0.4);
+  --bl-shadow-lg:     0 8px 24px rgba(0, 0, 0, 0.5);
+  --bl-shadow-xl:     0 16px 48px rgba(0, 0, 0, 0.6);
+  --bl-shadow-glow:   0 0 20px rgba(var(--bl-accent-rgb), 0.15),
+                      0 0 40px rgba(var(--bl-accent-rgb), 0.05);
+  --bl-shadow-glow-lg:0 0 30px rgba(var(--bl-accent-rgb), 0.25),
+                      0 0 60px rgba(var(--bl-accent-rgb), 0.1),
+                      0 0 100px rgba(var(--bl-accent-rgb), 0.05);
+
+  /* ── Glow Effects ── */
+  --bl-glow-green:    0 0 20px rgba(107, 201, 80, 0.30), 0 0 60px rgba(107, 201, 80, 0.12);
+  --bl-glow-blue:     0 0 20px rgba(0, 153, 255, 0.30), 0 0 60px rgba(0, 153, 255, 0.12);
+  --bl-glow-gold:     0 0 20px rgba(212, 168, 83, 0.30), 0 0 60px rgba(212, 168, 83, 0.12);
+  --bl-glow-red:      0 0 20px rgba(239, 68, 68, 0.30), 0 0 60px rgba(239, 68, 68, 0.12);
+
+  /* ── Border Radius (v2.1 — scaled) ── */
+  --bl-radius-xs:     5px;
+  --bl-radius-sm:     8px;
+  --bl-radius-md:     10px;
+  --bl-radius-lg:     14px;
+  --bl-radius-xl:     20px;
+  --bl-radius-2xl:    26px;
+  --bl-radius-3xl:    30px;
+  --bl-radius-full:   9999px;
+
+  /* ── Typography ── */
+  --bl-font-sans:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --bl-font-mono:     'IBM Plex Mono', 'SF Mono', monospace;
+  --bl-font-mono-alt: 'Space Mono', 'IBM Plex Mono', monospace;
+  --bl-font-display:  'Inter', system-ui, sans-serif;
+
+  /* ── Font Sizes (v2.1 — +30% readability scale) ── */
+  /* 2xs: degrau abaixo do xs, pra chip/badge em área densa (card de kanban).
+     Não usar em texto corrido — só rótulo curto e maiúsculo. */
+  --bl-text-2xs:      10px;
+  --bl-text-xs:       14px;
+  --bl-text-sm:       16px;
+  --bl-text-base:     18px;
+  --bl-text-md:       21px;
+  --bl-text-lg:       23px;
+  --bl-text-xl:       29px;
+  --bl-text-2xl:      39px;
+  --bl-text-3xl:      47px;
+
+  /* ── Line Heights ── */
+  --bl-leading-tight:   1.2;
+  --bl-leading-normal:  1.5;
+  --bl-leading-relaxed: 1.65;
+
+  /* ── Letter Spacing ── */
+  --bl-tracking-tight:  -0.02em;
+  --bl-tracking-normal: 0;
+  --bl-tracking-wide:   0.02em;
+  --bl-tracking-wider:  0.05em;
+
+  /* ── Spacing (5px grid — v2.1 +30% readability) ── */
+  --bl-space-0:       0;
+  --bl-space-1:       5px;
+  --bl-space-2:       10px;
+  --bl-space-3:       15px;
+  --bl-space-4:       20px;
+  --bl-space-5:       25px;
+  --bl-space-6:       30px;
+  --bl-space-8:       40px;
+  --bl-space-10:      50px;
+  --bl-space-12:      60px;
+  --bl-space-16:      80px;
+
+  /* ── Transitions ── */
+  --bl-ease:          cubic-bezier(0.32, 0.72, 0, 1);
+  --bl-ease-bounce:   cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --bl-ease-out:      cubic-bezier(0, 0, 0.2, 1);
+  --bl-duration-fast: 120ms;
+  --bl-duration-base: 200ms;
+  --bl-duration-slow: 350ms;
+  --bl-duration-slower: 500ms;
+
+  /* ── Z-Index ── */
+  --bl-z-base:        0;
+  --bl-z-dropdown:    100;
+  --bl-z-sticky:      200;
+  --bl-z-sidebar:     300;
+  --bl-z-topbar:      9999;
+  /* modal/toast ficam ACIMA do topbar de propósito — um dialog cobre a navegação inteira */
+  --bl-z-modal-backdrop: 10000;
+  --bl-z-modal:       10001;
+  --bl-z-toast:       10002;
+
+  /* ── Layout (v2.1 — sidebar scaled, topbar=56px canonical) ── */
+  --bl-topbar-h:      56px;
+  --bl-topbar-bg:     rgba(9, 9, 12, 0.85);
+  --bl-sidebar-rail-w:80px;
+  --bl-sidebar-panel-w:320px;
+  --bl-content-max-w: 1400px;
+
+  /* ── Glass ── */
+  --bl-glass-blur:     40px;
+  --bl-glass-saturate: 180%;
+  --bl-glass-bg:       rgba(17, 17, 20, 0.25);
+  --bl-glass-bg-heavy: rgba(17, 17, 20, 0.55);
+
+  /* ── Grid Background ── */
+  --bl-grid-opacity:  0.02;
+  --bl-grid-size:     60px;
+
+  /* ── Scrollbar ── */
+  --bl-scroll-width:  6px;
+  --bl-scroll-track:  transparent;
+  --bl-scroll-thumb:  rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover:  rgba(255, 255, 255, 0.14);
+
+  /* ── Kanban Board ── */
+  /* Scrollbar: usa accent do produto. Override --bl-kanban-scroll per-app.
+     Padrao: accent generico rgba(var(--bl-accent-rgb), 0.35)
+     exemplos: verde rgba(107, 201, 80, 0.35) · amarelo rgba(251, 191, 36, 0.35)
+     Column max-height: 65vh com overflow-y auto.
+     Scrollbar width: 6px, border-radius 999px, track transparente. */
+  --bl-kanban-scroll:       rgba(var(--bl-accent-rgb), 0.35);
+  --bl-kanban-scroll-hover: rgba(var(--bl-accent-rgb), 0.55);
+  --bl-kanban-col-max-h:    65vh;
+}
+
+/* ── Base body ── */
+body {
+  background: var(--bl-bg-primary);
+  color: var(--bl-text-primary);
+  font-family: var(--bl-font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ── Executor Colors ── */
+[data-executor="ai"]     { --bl-executor: #0099FF; --bl-executor-glow: rgba(0,153,255,0.30); }
+[data-executor="hybrid"] { --bl-executor: #D4A853; --bl-executor-glow: rgba(212,168,83,0.30); }
+[data-executor="human"]  { --bl-executor: #f4f4e8; --bl-executor-glow: rgba(244,244,232,0.15); }

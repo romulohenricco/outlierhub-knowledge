@@ -1,0 +1,222 @@
+/* ============================================================
+   Design System — Theme Picker (vanilla)
+   Versao do ThemePicker (React/next-themes) em HTML + CSS puro. SEM build, SEM React.
+
+   Botao: icone paleta + bolinha swatch do tema ativo.
+   Dropdown: card agrupado ESCUROS / CLAROS, item com swatch
+   redondo + label + check no ativo, slide-in, z alto.
+
+   Usa SOMENTE tokens --bl-* (tokens.css). Casa com topbar.css.
+   Prefix: .bl-theme-picker
+   ============================================================ */
+
+/* ── Root (anchor do dropdown) ── */
+
+.bl-theme-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Trigger (botao paleta) ── */
+
+.bl-theme-picker__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--bl-radius-sm);
+  background: transparent;
+  color: var(--bl-text-dim);
+  cursor: pointer;
+  transition: color var(--bl-duration-fast) var(--bl-ease),
+              background var(--bl-duration-fast) var(--bl-ease);
+}
+
+.bl-theme-picker__trigger:hover {
+  color: var(--bl-text-primary);
+  /* tema-aware: escurece sobre claro, clareia sobre escuro (nao usar alpha de branco hardcoded) */
+  background: var(--bl-bg-card-hover);
+}
+
+.bl-theme-picker__trigger:focus-visible {
+  outline: 2px solid rgba(var(--bl-accent-rgb), 0.6);
+  outline-offset: 2px;
+}
+
+.bl-theme-picker__trigger[aria-expanded="true"] {
+  color: rgba(var(--bl-accent-rgb), 0.95);
+  background: rgba(var(--bl-accent-rgb), 0.12);
+}
+
+.bl-theme-picker__trigger-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Bolinha swatch do tema ativo (canto inferior-direito do botao) */
+.bl-theme-picker__trigger-swatch {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--bl-radius-full);
+  /* ring no card-color pra destacar do icone */
+  box-shadow: 0 0 0 1.5px var(--bl-bg-primary);
+  pointer-events: none;
+}
+
+/* ── Dropdown (card) ── */
+
+.bl-theme-picker__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 224px;
+  padding: var(--bl-space-1);
+  background: var(--bl-glass-bg-heavy);
+  backdrop-filter: blur(var(--bl-glass-blur)) saturate(var(--bl-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--bl-glass-blur)) saturate(var(--bl-glass-saturate));
+  border: 1px solid var(--bl-border-2);
+  border-radius: var(--bl-radius-lg);
+  box-shadow: var(--bl-shadow-lg),
+              0 0 0 1px rgba(255, 255, 255, 0.02);
+  z-index: var(--bl-z-dropdown);
+  overflow: hidden;
+  transform-origin: top right;
+  animation: bl-theme-picker-slide-in var(--bl-duration-base) var(--bl-ease);
+}
+
+/* Liquid glass highlight (igual topbar dropdown) */
+.bl-theme-picker__menu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.bl-theme-picker__menu[hidden] {
+  display: none;
+}
+
+@keyframes bl-theme-picker-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bl-theme-picker__menu {
+    animation: none;
+  }
+}
+
+/* ── Grupo (ESCUROS / CLAROS) ── */
+
+.bl-theme-picker__group + .bl-theme-picker__group {
+  border-top: 1px solid var(--bl-border-2);
+  margin-top: var(--bl-space-1);
+  padding-top: var(--bl-space-1);
+}
+
+.bl-theme-picker__group-label {
+  padding: 6px 10px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--bl-text-ghost);
+  text-transform: uppercase;
+  letter-spacing: var(--bl-tracking-wider);
+}
+
+.bl-theme-picker__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* ── Item de tema ── */
+
+.bl-theme-picker__item {
+  display: flex;
+  align-items: center;
+  gap: var(--bl-space-2);
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--bl-radius-sm);
+  background: transparent;
+  color: var(--bl-text-secondary);
+  font-family: inherit;
+  font-size: var(--bl-text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--bl-duration-fast) var(--bl-ease),
+              background var(--bl-duration-fast) var(--bl-ease);
+}
+
+.bl-theme-picker__item:hover {
+  color: var(--bl-text-primary);
+  /* tema-aware: visivel tanto em claro (alpha de FG) quanto em escuro (alpha de branco) */
+  background: var(--bl-bg-card-hover);
+}
+
+.bl-theme-picker__item:focus-visible {
+  outline: none;
+  color: var(--bl-text-primary);
+  background: var(--bl-bg-card-hover);
+  box-shadow: inset 0 0 0 1px rgba(var(--bl-accent-rgb), 0.4);
+}
+
+.bl-theme-picker__item[aria-checked="true"] {
+  color: var(--bl-text-primary);
+  background: rgba(var(--bl-accent-rgb), 0.12);
+}
+
+/* Swatch redondo do item */
+.bl-theme-picker__item-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--bl-radius-full);
+  box-shadow: 0 0 0 1px var(--bl-border-4);
+  flex-shrink: 0;
+}
+
+.bl-theme-picker__item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Check no ativo */
+.bl-theme-picker__item-check {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: rgba(var(--bl-accent-rgb), 0.95);
+  opacity: 0;
+}
+
+.bl-theme-picker__item[aria-checked="true"] .bl-theme-picker__item-check {
+  opacity: 1;
+}
+
+/* ── Mount flutuante (paginas sem topbar, ex.: modulos.html) ── */
+.bl-theme-picker__floating {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: var(--bl-z-topbar, 9999);
+}

@@ -1,0 +1,337 @@
+/* ============================================================
+   SHELL — rail fixo (80px) + panel colapsável (320px) + offset
+   Panel PERSISTENTE e colapsável (minimizar/maximizar),
+   estado global em :root[data-nav="collapsed"]. Prefixo .bl-
+   ============================================================ */
+
+/* gutter — espaço visível entre topbar/rail/panel/conteúdo (elementos "flutuantes" separados) */
+:root { --bl-shell-gutter: 16px; }
+
+/* largura total do chrome de navegação (rail + panel + gutters) → usada no offset do conteúdo.
+   Colapsado: só o panel esconde — o rail de ícones fica sempre visível (≥768px). */
+:root { --shell-nav-w: calc(var(--bl-shell-gutter) * 3 + var(--bl-sidebar-rail-w) + var(--bl-sidebar-panel-w)); }
+:root[data-nav="collapsed"] { --shell-nav-w: calc(var(--bl-shell-gutter) * 2 + var(--bl-sidebar-rail-w)); }
+
+/* ── Rail (flutuante, cantos arredondados em todos os lados) ─ */
+.bl-sidebar-rail {
+  position: fixed;
+  top: calc(var(--bl-topbar-h) + var(--bl-shell-gutter) * 2);
+  left: var(--bl-shell-gutter);
+  bottom: var(--bl-shell-gutter);
+  width: var(--bl-sidebar-rail-w);
+  background: var(--bl-bg-1);
+  border: 1px solid var(--bl-border-1);
+  border-radius: var(--bl-radius-xl);
+  box-shadow: var(--bl-shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--bl-space-3) 0;
+  gap: var(--bl-space-1);
+  z-index: var(--bl-z-sidebar);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  transition: transform var(--bl-duration-slow) var(--bl-ease),
+              opacity var(--bl-duration-slow) var(--bl-ease);
+}
+.bl-sidebar-rail::-webkit-scrollbar { display: none; }
+
+.bl-sidebar-rail__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--bl-radius-md);
+  color: var(--bl-text-dim);
+  cursor: pointer;
+  text-decoration: none;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  transition: color var(--bl-duration-fast) var(--bl-ease),
+              background var(--bl-duration-fast) var(--bl-ease);
+}
+.bl-sidebar-rail__item:hover { color: var(--bl-text-secondary); background: rgba(255,255,255,.04); }
+.bl-sidebar-rail__item:active { cursor: grabbing; }
+.bl-sidebar-rail__item--drag-over {
+  box-shadow: inset 0 2px 0 rgba(var(--bl-accent-rgb), .8);
+  background: rgba(var(--bl-accent-rgb), .06);
+}
+.bl-sidebar-rail__item--active { color: var(--bl-text-primary); background: rgba(var(--bl-accent-rgb), .08); }
+.bl-sidebar-rail__item--active::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 22px;
+  background: rgba(var(--bl-accent-rgb), .9);
+  border-radius: 0 var(--bl-radius-xs) var(--bl-radius-xs) 0;
+  box-shadow: 0 0 8px rgba(var(--bl-accent-rgb), .4);
+}
+.bl-sidebar-rail__item-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.bl-sidebar-rail__item-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  line-height: 1;
+  max-width: 74px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bl-sidebar-rail__spacer { flex: 1 1 auto; }
+
+/* botão de expandir (só faz sentido quando o panel está colapsado) */
+.bl-sidebar-rail__toggle { color: var(--bl-text-dim); }
+.bl-sidebar-rail__toggle:hover { color: var(--bl-accent); background: rgba(var(--bl-accent-rgb), .08); }
+:root:not([data-nav="collapsed"]) .bl-sidebar-rail__toggle { display: none; }
+
+/* ── Panel (flutuante, colapsável, gap visível em relação ao rail) ── */
+.bl-sidebar-panel {
+  position: fixed;
+  top: calc(var(--bl-topbar-h) + var(--bl-shell-gutter) * 2);
+  left: calc(var(--bl-shell-gutter) * 2 + var(--bl-sidebar-rail-w));
+  bottom: var(--bl-shell-gutter);
+  width: var(--bl-sidebar-panel-w);
+  background: var(--bl-bg-2);
+  border: 1px solid var(--bl-border-2);
+  border-radius: var(--bl-radius-xl);
+  box-shadow: var(--bl-shadow-md);
+  z-index: calc(var(--bl-z-sidebar) - 1);
+  display: flex;
+  flex-direction: column;
+  padding: var(--bl-space-4);
+  overflow-y: auto;
+  transition: transform var(--bl-duration-slow) var(--bl-ease),
+              opacity var(--bl-duration-slow) var(--bl-ease);
+}
+:root[data-nav="collapsed"] .bl-sidebar-panel {
+  transform: translateX(calc(-1 * (var(--bl-shell-gutter) * 2 + var(--bl-sidebar-rail-w) + var(--bl-sidebar-panel-w))));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bl-sidebar-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--bl-space-3);
+  border-bottom: 1px solid var(--bl-border-1);
+  margin-bottom: var(--bl-space-3);
+}
+.bl-sidebar-panel__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bl-text-secondary);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-family: var(--bl-font-mono);
+}
+.bl-sidebar-panel__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--bl-radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--bl-text-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--bl-duration-fast) var(--bl-ease),
+              background var(--bl-duration-fast) var(--bl-ease);
+}
+.bl-sidebar-panel__toggle:hover { color: var(--bl-text-primary); background: rgba(255,255,255,.06); }
+
+/* Seções arrastáveis do painel de filtro (kanban) — mesmo padrão visual do
+   rail de ícones (.bl-sidebar-rail__item--drag-over) pra reordenar. */
+.bl-filtros-secao {
+  border-radius: var(--bl-radius-sm);
+  cursor: grab;
+}
+.bl-filtros-secao:active { cursor: grabbing; }
+.bl-filtros-secao--drag-over {
+  box-shadow: inset 0 2px 0 rgba(var(--bl-accent-rgb), .8);
+  background: rgba(var(--bl-accent-rgb), .06);
+}
+
+.bl-sidebar-panel__group-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--bl-text-ghost);
+  font-family: var(--bl-font-mono);
+  margin: var(--bl-space-2) 0 var(--bl-space-1) 4px;
+}
+
+/* item de nav do panel (ícone + rótulo + descrição) */
+.bl-navitem {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--bl-radius-md);
+  color: var(--bl-text-secondary);
+  text-decoration: none;
+  transition: color var(--bl-duration-fast) var(--bl-ease),
+              background var(--bl-duration-fast) var(--bl-ease);
+}
+.bl-navitem:hover { color: var(--bl-text-primary); background: rgba(255,255,255,.04); }
+.bl-navitem--active { color: var(--bl-text-primary); background: rgba(var(--bl-accent-rgb), .10); }
+.bl-navitem--active .bl-navitem__icon { color: var(--bl-accent); }
+.bl-navitem__icon { width: 17px; height: 17px; flex-shrink: 0; }
+.bl-navitem__label { font-size: 13px; font-weight: 500; line-height: 1.2; }
+.bl-navitem__desc { font-size: 10px; color: var(--bl-text-dim); margin-top: 1px; line-height: 1.2; }
+
+/* ── Conteúdo: definido no bloco CHROME FLUTUANTE + ORB (fim do arquivo) ── */
+
+/* ── Backdrop (scrim atrás do painel em overlay) ─────────── */
+.bl-sidebar-backdrop { display: none; }
+
+/* ── Hambúrguer na topbar (só em telas compactas) ────────── */
+.bl-topbar__menu {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 4px;
+  border: none;
+  background: transparent;
+  color: var(--bl-text-secondary);
+  border-radius: var(--bl-radius-sm);
+  cursor: pointer;
+  transition: color var(--bl-duration-fast) var(--bl-ease),
+              background var(--bl-duration-fast) var(--bl-ease);
+}
+.bl-topbar__menu:hover { color: var(--bl-text-primary); background: rgba(255,255,255,.06); }
+
+/* ── Tablet e menor (≤1023px): painel vira OVERLAY ───────── */
+@media (max-width: 1023px) {
+  /* conteúdo desloca só pelo rail (+ gutters); painel flutua por cima (não empurra) */
+  :root { --shell-nav-w: calc(var(--bl-shell-gutter) * 2 + var(--bl-sidebar-rail-w)); }
+  .bl-sidebar-panel { box-shadow: 10px 0 40px rgba(0, 0, 0, .55); }
+  :root:not([data-nav="collapsed"]) .bl-sidebar-panel {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .bl-topbar__menu { display: inline-flex; }
+  :root:not([data-nav="collapsed"]) .bl-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: calc(var(--bl-topbar-h) + var(--bl-shell-gutter)) 0 0 0;
+    background: rgba(0, 0, 0, .55);
+    z-index: calc(var(--bl-z-sidebar) - 2);
+  }
+}
+
+/* ── Celular (≤767px): rail some, conteúdo full-width, painel encosta na borda ── */
+@media (max-width: 767px) {
+  :root { --shell-nav-w: var(--bl-shell-gutter); }
+  .bl-sidebar-rail { display: none; }
+  .bl-sidebar-panel {
+    left: 0;
+    width: min(86vw, var(--bl-sidebar-panel-w));
+    border-radius: 0 var(--bl-radius-xl) var(--bl-radius-xl) 0;
+  }
+}
+
+/* ============================================================
+   CHROME FLUTUANTE + ORB
+   Em todas as páginas o conteúdo ocupa a tela inteira e topbar/rail/painel
+   flutuam por cima. O recuo do conteúdo (pra não nascer escondido embaixo
+   dos menus) vem de --chrome-left/--chrome-top, que encolhem quando o orb
+   recolhe tudo. Página de canvas (elemento [data-canvas-page] no conteúdo) não
+   tem recuo nenhum: o canvas vai de borda a borda por baixo dos menus (só o
+   respiro da barra de rolagem). Detectado por :has() — vem no HTML do servidor,
+   então não há recuo-e-depois-salto ao abrir a página.
+   ============================================================ */
+:root {
+  --bl-orb-size: 26px;
+  --chrome-left: var(--shell-nav-w);
+  --chrome-top: calc(var(--bl-topbar-h) + var(--bl-shell-gutter) * 2);
+}
+:root[data-chrome="recolhido"] {
+  --chrome-left: var(--bl-shell-gutter);
+  --chrome-top: calc(var(--bl-topbar-h) + var(--bl-shell-gutter));
+}
+/* área livre do CANVAS (onde a página de canvas põe os próprios controles flutuantes):
+   aberto = abaixo da topbar e à direita do rail; recolhido = na linha do orb, ao lado dele */
+:root {
+  --canvas-left: var(--chrome-left);
+  --canvas-top: var(--chrome-top);
+}
+:root[data-chrome="recolhido"] {
+  --canvas-left: calc(var(--bl-shell-gutter) + var(--bl-space-4) * 2 + var(--bl-orb-size));
+  --canvas-top: var(--bl-shell-gutter);
+}
+
+.bl-content {
+  padding-left: var(--chrome-left);
+  padding-top: var(--chrome-top);
+  padding-right: var(--bl-shell-gutter);
+  min-height: 100vh;
+  transition: padding var(--bl-duration-slow) var(--bl-ease);
+}
+.bl-content:has([data-canvas-page]) { padding-left: 0; padding-top: 0; transition: none; }
+
+/* orb fixo no lugar onde ele fica dentro da topbar — sobrevive à topbar recolhida */
+.bl-orb {
+  position: fixed;
+  top: calc(var(--bl-shell-gutter) + (var(--bl-topbar-h) - var(--bl-orb-size)) / 2);
+  left: calc(var(--bl-shell-gutter) + var(--bl-space-4));
+  width: var(--bl-orb-size);
+  height: var(--bl-orb-size);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  z-index: calc(var(--bl-z-topbar) + 1);
+  transition: box-shadow var(--bl-duration-fast) var(--bl-ease), transform var(--bl-duration-fast) var(--bl-ease);
+}
+.bl-orb .logo-orb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+}
+.bl-orb:hover { transform: scale(1.08); }
+.bl-orb:focus-visible { outline: 2px solid rgba(var(--bl-accent-rgb), .8); outline-offset: 3px; }
+/* recolhido: o orb fica sozinho por cima do conteúdo — anel pra destacar do fundo */
+:root[data-chrome="recolhido"] .bl-orb {
+  box-shadow: 0 0 0 4px rgba(9, 9, 12, .85), 0 0 0 5px var(--bl-border-1), var(--bl-shadow-md);
+}
+
+/* a topbar abre espaço pro orb fixo (o hambúrguer, em tela compacta, vem depois dele);
+   a marca perde a largura mínima, que contava com o orb dentro dela */
+.bl-topbar { padding-left: calc(var(--bl-space-4) + var(--bl-orb-size) + var(--bl-space-2)); }
+.bl-topbar__brand { min-width: 0; }
+
+.bl-topbar,
+.bl-sidebar-rail { transition: transform var(--bl-duration-slow) var(--bl-ease), opacity var(--bl-duration-slow) var(--bl-ease); }
+:root[data-chrome="recolhido"] .bl-topbar {
+  transform: translateY(calc(-100% - var(--bl-shell-gutter) * 2));
+  opacity: 0;
+  pointer-events: none;
+}
+:root[data-chrome="recolhido"] .bl-sidebar-rail,
+:root[data-chrome="recolhido"] .bl-sidebar-panel {
+  transform: translateX(calc(-100% - var(--bl-shell-gutter) * 2));
+  opacity: 0;
+  pointer-events: none;
+}
+:root[data-chrome="recolhido"] .bl-sidebar-backdrop { display: none !important; }

@@ -1,0 +1,4 @@
+# ganchos do git são scripts de shell: precisam de fim de linha LF em qualquer sistema
+.githooks/* text eol=lf
+*.pdf binary
+*.png binary

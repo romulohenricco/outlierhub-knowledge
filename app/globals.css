@@ -1,0 +1,118 @@
+/* ── Design System v2.0 (vendorizado em app/bos/).
+   Ordem: tokens → themes → tipografia → componentes. ── */
+@import "./bos/tokens.css";
+@import "./bos/themes.css";
+@import "./bos/typography.css";
+@import "./bos/components.css";
+@import "./bos/topbar.css";
+@import "./bos/sidebar.css";
+@import "./bos/shell.css";
+@import "./bos/theme-picker.css";
+@import "./bos/effects.css";
+@import "./bos/utilities.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* fontes servidas pelo next/font (local-first, sem CDN) */
+  --bl-font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  --bl-font-mono: var(--font-ibm-plex-mono), var(--font-geist-mono), 'SF Mono', monospace;
+  --bl-font-display: var(--font-inter), system-ui, sans-serif;
+
+  /* aliases legados → tokens do design system */
+  --color-cobre: #C9B79C;
+  --bg-base: var(--bl-bg-primary);
+  --bg-elevated: var(--bl-bg-elevated);
+  --bg-card: var(--bl-bg-card-solid);
+  --bg-card-hover: var(--bl-bg-card-hover);
+  --border: var(--bl-border);
+  --border-hover: var(--bl-border-hover);
+  --text-bright: var(--bl-text-primary);
+  --text-primary: var(--bl-text-primary);
+  --text-secondary: var(--bl-text-secondary);
+  --text-muted: var(--bl-text-muted);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--bl-accent-rgb), 0.5) transparent;
+}
+
+/* ── Scrollbar fino, na cor de destaque do tema ── */
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(var(--bl-accent-rgb), 0.5);
+  border-radius: var(--bl-radius-full);
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(var(--bl-accent-rgb), 0.75); }
+
+html {
+  font-family: var(--bl-font-sans);
+  background: var(--bl-bg-primary);
+  color: var(--bl-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bl-bg-primary);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--bl-accent);
+  color: var(--bl-bg-primary);
+}
+
+/* ── Leitura (TXT/MD tipografado) ─────────────────────────────── */
+.leitura {
+  font-family: var(--font-inter), Georgia, serif;
+  font-size: 17px;
+  line-height: 1.75;
+  color: #d6d6d6;
+  max-width: 72ch;
+  margin: 0 auto;
+}
+.leitura h1, .leitura h2, .leitura h3, .leitura h4 {
+  color: var(--text-bright);
+  line-height: 1.3;
+  margin: 1.6em 0 0.6em;
+  font-weight: 600;
+}
+.leitura h1 { font-size: 1.7em; }
+.leitura h2 { font-size: 1.35em; }
+.leitura h3 { font-size: 1.15em; }
+.leitura p { margin: 0 0 1em; }
+.leitura ul { margin: 0 0 1em 1.4em; }
+.leitura li { margin-bottom: 0.35em; }
+.leitura code {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.leitura strong { color: var(--text-bright); }
+
+/* ── logo-orb: asset original local (public/logo-orb.svg) ── */
+.logo-orb {
+  background-image: url("/logo-orb.svg") !important;
+}
+
+/* ── Leitura: tabelas e citações (markdown) ── */
+.leitura .tabela-scroll { overflow-x: auto; margin: 0 0 1.2em; }
+.leitura table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.5; }
+.leitura th, .leitura td { border: 1px solid var(--bl-border); padding: 6px 10px; text-align: left; vertical-align: top; }
+.leitura th { background: var(--bl-bg-elevated); font-family: var(--bl-font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bl-text-secondary); }
+.leitura blockquote { border-left: 3px solid var(--bl-accent); padding: 2px 0 2px 14px; margin: 0 0 1.2em; color: var(--bl-text-secondary); font-style: italic; }

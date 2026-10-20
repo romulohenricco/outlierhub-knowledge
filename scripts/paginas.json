@@ -1,0 +1,16 @@
+{
+  "prefixoBranch": "pagina/",
+  "base": "main",
+  "paginas": [
+    { "nome": "agente", "rota": "/agente", "porta": 3311 },
+    { "nome": "kanban", "rota": "/kanban", "porta": 3312 },
+    { "nome": "backlog", "rota": "/kanban/backlog", "porta": 3313 },
+    { "nome": "estante", "rota": "/estante", "porta": 3314 },
+    { "nome": "grafo", "rota": "/grafo", "porta": 3315 },
+    { "nome": "referencias", "rota": "/referencias", "porta": 3316 },
+    { "nome": "ontologia", "rota": "/ontologia", "porta": 3317 },
+    { "nome": "ingestoes", "rota": "/ingestoes", "porta": 3318 },
+    { "nome": "integracoes", "rota": "/integracoes", "porta": 3319 },
+    { "nome": "social", "rota": "/mysocialmedia", "porta": 3320 }
+  ]
+}

@@ -1,0 +1,990 @@
+/* ============================================================================
+ * themes.css -- CAMADA RUNTIME MULTI-TEMA
+ * ----------------------------------------------------------------------------
+ * Camada RUNTIME de temas: [data-theme="X"] troca a PALETA inteira do app
+ * por tema. Cada bloco [data-theme] sobrescreve
+ * SOMENTE o subconjunto temavel (~47 tokens --bl-*); tudo que e estrutural
+ * (radius, tipografia, spacing, transitions, z-index, layout, paleta semantica
+ * fixa --bl-blue/purple/...) permanece no :root de tokens.css e NUNCA e tocado.
+ *
+ * GERADO a partir das paletas-fonte via mapping-contract.md.
+ * CARREGAR DEPOIS de tokens.css:
+ *   <link rel="stylesheet" href="tokens.css">
+ *   <link rel="stylesheet" href="themes.css">
+ * Selecionar tema em runtime: <html data-theme="bos"> (ou moon, sun, dark, ...).
+ * Default sem [data-theme] = :root de tokens.css (== bos). O bloco
+ * [data-theme="bos"] esta incluido explicitamente para selecao explicita.
+ *
+ * Temas claros (light/paper/sun) usam bordas + scrollbar com alpha de PRETO e
+ * glass de alpha alto (>0.5), por contrato. Temas escuros usam alpha de BRANCO.
+ * Valores HEX/rgba ja resolvidos (lighten/darken/mix/alpha do contrato).
+ * ============================================================================ */
+
+
+[data-theme="bos"] {
+  /* BOS (default) - ESCURO | primary #e85600 - tema quente (laranja acao + cobre acento) */
+  /* PORTE FIEL do tokens.css (:root). Acento = laranja, NAO verde. */
+  /* Backgrounds (tokens.css :root) */
+  --bl-bg-0: #070708;
+  --bl-bg-1: #0a0a0b;
+  --bl-bg-2: #0e0f11;
+  --bl-bg-3: #141414;
+  --bl-bg-4: #161616;
+  --bl-bg-5: #1f2020;
+  --bl-bg-primary: #0e0f11;
+  --bl-bg-elevated: #161616;
+  --bl-bg-surface: #161616;
+  --bl-bg-surface-alt: #1f2020;
+  --bl-bg-input: #1a1a1a;
+  --bl-bg-card: rgba(22, 22, 22, 0.35);
+  --bl-bg-card-solid: rgba(31, 32, 32, 0.65);
+  --bl-bg-card-hover: rgba(40, 40, 40, 0.75);
+  /* Texto (tokens.css :root — cream) */
+  --bl-text-primary: #f4f1ea;
+  --bl-text-secondary: #c7c7c7;
+  --bl-text-dim: #8d8d8d;
+  --bl-text-muted: #6b6b6b;
+  --bl-text-ghost: #4a4a4a;
+  /* Acento + marca (tokens.css :root — warm: laranja acao #e85600) */
+  --bl-green: #e85600;
+  --bl-green-dim: rgba(232, 86, 0, 0.15);
+  --bl-green-glow: rgba(232, 86, 0, 0.25);
+  --bl-green-soft: rgba(232, 86, 0, 0.08);
+  --bl-green-rgb: 232, 86, 0;
+  --bl-green-300: #FFAA73;
+  --bl-accent: #e85600;
+  --bl-accent-dim: rgba(232, 86, 0, 0.15);
+  --bl-accent-glow: rgba(232, 86, 0, 0.25);
+  --bl-accent-rgb: 232, 86, 0;
+  /* Status (tokens.css :root) */
+  --bl-success: #22c55e;
+  --bl-info: #a5d2ff;
+  --bl-warning: #ff8f39;
+  --bl-danger: #df4a63;
+  /* Bordas (tokens.css :root) */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(232, 86, 0, 0.2);
+  /* Glass / topbar (tokens.css :root) */
+  --bl-glass-bg: rgba(22, 22, 22, 0.25);
+  --bl-glass-bg-heavy: rgba(22, 22, 22, 0.55);
+  --bl-topbar-bg: rgba(14, 15, 17, 0.85);
+  /* Scrollbar (tokens.css :root) */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid (tokens.css :root) */
+  --bl-glow-green: 0 0 20px rgba(232, 86, 0, 0.3), 0 0 60px rgba(232, 86, 0, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="gestao"] {
+  /* Gestao - cores ORIGINAIS de um app de referência (BOS classico verde) - ESCURO | primary #6bc950 */
+  /* Paleta classica. Acento = verde. */
+  /* Backgrounds */
+  --bl-bg-0: #030303;
+  --bl-bg-1: #050505;
+  --bl-bg-2: #0a0a0c;
+  --bl-bg-3: #0c0c0e;
+  --bl-bg-4: #111114;
+  --bl-bg-5: #18181b;
+  --bl-bg-primary: #030303;
+  --bl-bg-elevated: #111114;
+  --bl-bg-surface: #0c0c0e;
+  --bl-bg-surface-alt: #18181b;
+  --bl-bg-input: #131316;
+  --bl-bg-card: rgba(17, 17, 20, 0.25);
+  --bl-bg-card-solid: rgba(28, 28, 30, 0.65);
+  --bl-bg-card-hover: rgba(35, 35, 38, 0.75);
+  /* Texto */
+  --bl-text-primary: #f4f4e8;
+  --bl-text-secondary: #a1a1aa;
+  --bl-text-dim: #71717a;
+  --bl-text-muted: #52525b;
+  --bl-text-ghost: #3f3f46;
+  /* Acento + marca (verde classico) */
+  --bl-green: #6bc950;
+  --bl-green-dim: rgba(107, 201, 80, 0.15);
+  --bl-green-glow: rgba(107, 201, 80, 0.25);
+  --bl-green-soft: rgba(107, 201, 80, 0.08);
+  --bl-green-rgb: 107, 201, 80;
+  --bl-green-300: #9ae07e;
+  --bl-accent: #6bc950;
+  --bl-accent-dim: rgba(107, 201, 80, 0.15);
+  --bl-accent-glow: rgba(107, 201, 80, 0.25);
+  --bl-accent-rgb: 107, 201, 80;
+  /* Status */
+  --bl-success: #6bc950;
+  --bl-info: #5ac8fa;
+  --bl-warning: #f59e0b;
+  --bl-danger: #ff453a;
+  /* Bordas (alpha de branco .04/.08/.12/.16) */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.08);
+  --bl-border-3: rgba(255, 255, 255, 0.12);
+  --bl-border-4: rgba(255, 255, 255, 0.16);
+  --bl-border: rgba(255, 255, 255, 0.08);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(107, 201, 80, 0.25);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(17, 17, 20, 0.25);
+  --bl-glass-bg-heavy: rgba(17, 17, 20, 0.55);
+  --bl-topbar-bg: rgba(9, 9, 12, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.12);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.16);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(107, 201, 80, 0.3), 0 0 60px rgba(107, 201, 80, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="dark"] {
+  /* Void - ESCURO | primary #22d3ee */
+  /* Backgrounds */
+  --bl-bg-0: #0b0d12;
+  --bl-bg-1: #0f141d;
+  --bl-bg-2: #131a24;
+  --bl-bg-3: #1b2431;
+  --bl-bg-4: #29313d;
+  --bl-bg-5: #363e4a;
+  --bl-bg-primary: #0b0d12;
+  --bl-bg-elevated: #1b2431;
+  --bl-bg-surface: #131a24;
+  --bl-bg-surface-alt: #1b2431;
+  --bl-bg-input: #0e121a;
+  --bl-bg-card: rgba(19, 26, 36, 0.35);
+  --bl-bg-card-solid: rgba(27, 36, 49, 0.65);
+  --bl-bg-card-hover: rgba(41, 49, 61, 0.75);
+  /* Texto */
+  --bl-text-primary: #f2f4f8;
+  --bl-text-secondary: #d8dbe3;
+  --bl-text-dim: #b9bec9;
+  --bl-text-muted: #8a91a3;
+  --bl-text-ghost: #515662;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #22d3ee;
+  --bl-green-dim: rgba(34, 211, 238, 0.15);
+  --bl-green-glow: rgba(34, 211, 238, 0.25);
+  --bl-green-soft: rgba(34, 211, 238, 0.08);
+  --bl-green-rgb: 34, 211, 238;
+  --bl-green-300: #6fe2f4;
+  --bl-accent: #22d3ee;
+  --bl-accent-dim: rgba(34, 211, 238, 0.15);
+  --bl-accent-glow: rgba(34, 211, 238, 0.25);
+  --bl-accent-rgb: 34, 211, 238;
+  /* Status */
+  --bl-success: #22c55e;
+  --bl-info: #3892ff;
+  --bl-warning: #f59e0b;
+  --bl-danger: #e85a6b;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(34, 211, 238, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(19, 26, 36, 0.25);
+  --bl-glass-bg-heavy: rgba(19, 26, 36, 0.55);
+  --bl-topbar-bg: rgba(11, 13, 18, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(34, 211, 238, 0.3), 0 0 60px rgba(34, 211, 238, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="midnight-blue"] {
+  /* Midnight Blue - ESCURO | primary #3c83f6 */
+  /* Backgrounds */
+  --bl-bg-0: #070a13;
+  --bl-bg-1: #0b111d;
+  --bl-bg-2: #141a29;
+  --bl-bg-3: #1f2533;
+  --bl-bg-4: #2c323f;
+  --bl-bg-5: #3a3f4b;
+  --bl-bg-primary: #070a13;
+  --bl-bg-elevated: #1f2533;
+  --bl-bg-surface: #141a29;
+  --bl-bg-surface-alt: #1f2533;
+  --bl-bg-input: #0a0f1a;
+  --bl-bg-card: rgba(20, 26, 41, 0.35);
+  --bl-bg-card-solid: rgba(31, 37, 51, 0.65);
+  --bl-bg-card-hover: rgba(44, 50, 63, 0.75);
+  /* Texto */
+  --bl-text-primary: #e7eaef;
+  --bl-text-secondary: #cfd4de;
+  --bl-text-dim: #b2bbca;
+  --bl-text-muted: #8794ab;
+  --bl-text-ghost: #4d5667;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #3c83f6;
+  --bl-green-dim: rgba(60, 131, 246, 0.15);
+  --bl-green-glow: rgba(60, 131, 246, 0.25);
+  --bl-green-soft: rgba(60, 131, 246, 0.08);
+  --bl-green-rgb: 60, 131, 246;
+  --bl-green-300: #80aef9;
+  --bl-accent: #3c83f6;
+  --bl-accent-dim: rgba(60, 131, 246, 0.15);
+  --bl-accent-glow: rgba(60, 131, 246, 0.25);
+  --bl-accent-rgb: 60, 131, 246;
+  /* Status */
+  --bl-success: #3bce9d;
+  --bl-info: #3c83f6;
+  --bl-warning: #f59f0a;
+  --bl-danger: #e85a6b;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(60, 131, 246, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(20, 26, 41, 0.25);
+  --bl-glass-bg-heavy: rgba(20, 26, 41, 0.55);
+  --bl-topbar-bg: rgba(7, 10, 19, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(60, 131, 246, 0.3), 0 0 60px rgba(60, 131, 246, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="synthwave"] {
+  /* Synthwave - ESCURO | primary #f17eb8 */
+  /* Backgrounds */
+  --bl-bg-0: #0d0911;
+  --bl-bg-1: #170f1f;
+  --bl-bg-2: #21182a;
+  --bl-bg-3: #2e2438;
+  --bl-bg-4: #3b3144;
+  --bl-bg-5: #473e50;
+  --bl-bg-primary: #0d0911;
+  --bl-bg-elevated: #2e2438;
+  --bl-bg-surface: #21182a;
+  --bl-bg-surface-alt: #2e2438;
+  --bl-bg-input: #140d1b;
+  --bl-bg-card: rgba(33, 24, 42, 0.35);
+  --bl-bg-card-solid: rgba(46, 36, 56, 0.65);
+  --bl-bg-card-hover: rgba(59, 49, 68, 0.75);
+  /* Texto */
+  --bl-text-primary: #ede9ed;
+  --bl-text-secondary: #d8d0dc;
+  --bl-text-dim: #bfb1c6;
+  --bl-text-muted: #9a83a7;
+  --bl-text-ghost: #5b4c64;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #f17eb8;
+  --bl-green-dim: rgba(241, 126, 184, 0.15);
+  --bl-green-glow: rgba(241, 126, 184, 0.25);
+  --bl-green-soft: rgba(241, 126, 184, 0.08);
+  --bl-green-rgb: 241, 126, 184;
+  --bl-green-300: #f6abd1;
+  --bl-accent: #f17eb8;
+  --bl-accent-dim: rgba(241, 126, 184, 0.15);
+  --bl-accent-glow: rgba(241, 126, 184, 0.25);
+  --bl-accent-rgb: 241, 126, 184;
+  /* Status */
+  --bl-success: #30e8d6;
+  --bl-info: #cc66ff;
+  --bl-warning: #ffcc33;
+  --bl-danger: #e8304f;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(241, 126, 184, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(33, 24, 42, 0.25);
+  --bl-glass-bg-heavy: rgba(33, 24, 42, 0.55);
+  --bl-topbar-bg: rgba(13, 9, 17, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(241, 126, 184, 0.3), 0 0 60px rgba(241, 126, 184, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="solarized-dark"] {
+  /* Solarized Dark - ESCURO | primary #b38600 */
+  /* Backgrounds */
+  --bl-bg-0: #00141a;
+  --bl-bg-1: #041e25;
+  --bl-bg-2: #0f272e;
+  --bl-bg-3: #1b3037;
+  --bl-bg-4: #293c43;
+  --bl-bg-5: #36494f;
+  --bl-bg-primary: #00141a;
+  --bl-bg-elevated: #1b3037;
+  --bl-bg-surface: #0f272e;
+  --bl-bg-surface-alt: #1b3037;
+  --bl-bg-input: #031b22;
+  --bl-bg-card: rgba(15, 39, 46, 0.35);
+  --bl-bg-card-solid: rgba(27, 48, 55, 0.65);
+  --bl-bg-card-hover: rgba(41, 60, 67, 0.75);
+  /* Texto */
+  --bl-text-primary: #d1cec7;
+  --bl-text-secondary: #babfbd;
+  --bl-text-dim: #9eaeb2;
+  --bl-text-muted: #7593a0;
+  --bl-text-ghost: #405a64;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #b38600;
+  --bl-green-dim: rgba(179, 134, 0, 0.15);
+  --bl-green-glow: rgba(179, 134, 0, 0.25);
+  --bl-green-soft: rgba(179, 134, 0, 0.08);
+  --bl-green-rgb: 179, 134, 0;
+  --bl-green-300: #ceb059;
+  --bl-accent: #b38600;
+  --bl-accent-dim: rgba(179, 134, 0, 0.15);
+  --bl-accent-glow: rgba(179, 134, 0, 0.25);
+  --bl-accent-rgb: 179, 134, 0;
+  /* Status */
+  --bl-success: #859900;
+  --bl-info: #2aa298;
+  --bl-warning: #f26326;
+  --bl-danger: #dc312e;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(179, 134, 0, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(15, 39, 46, 0.25);
+  --bl-glass-bg-heavy: rgba(15, 39, 46, 0.55);
+  --bl-topbar-bg: rgba(0, 20, 26, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(179, 134, 0, 0.3), 0 0 60px rgba(179, 134, 0, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="catppuccin"] {
+  /* Catppuccin Mocha - ESCURO | primary #caa6f7 */
+  /* Backgrounds */
+  --bl-bg-0: #181825;
+  --bl-bg-1: #1e1e2e;
+  --bl-bg-2: #282839;
+  --bl-bg-3: #323243;
+  --bl-bg-4: #3e3e4e;
+  --bl-bg-5: #4b4b5a;
+  --bl-bg-primary: #181825;
+  --bl-bg-elevated: #323243;
+  --bl-bg-surface: #282839;
+  --bl-bg-surface-alt: #323243;
+  --bl-bg-input: #1c1c2b;
+  --bl-bg-card: rgba(40, 40, 57, 0.35);
+  --bl-bg-card-solid: rgba(50, 50, 67, 0.65);
+  --bl-bg-card-hover: rgba(62, 62, 78, 0.75);
+  /* Texto */
+  --bl-text-primary: #ccd5f5;
+  --bl-text-secondary: #bcc4e6;
+  --bl-text-dim: #a8b1d3;
+  --bl-text-muted: #8a93b8;
+  --bl-text-ghost: #575c76;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #caa6f7;
+  --bl-green-dim: rgba(202, 166, 247, 0.15);
+  --bl-green-glow: rgba(202, 166, 247, 0.25);
+  --bl-green-soft: rgba(202, 166, 247, 0.08);
+  --bl-green-rgb: 202, 166, 247;
+  --bl-green-300: #ddc5fa;
+  --bl-accent: #caa6f7;
+  --bl-accent-dim: rgba(202, 166, 247, 0.15);
+  --bl-accent-glow: rgba(202, 166, 247, 0.25);
+  --bl-accent-rgb: 202, 166, 247;
+  /* Status */
+  --bl-success: #a6e3a1;
+  --bl-info: #89dceb;
+  --bl-warning: #fab387;
+  --bl-danger: #f46685;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(202, 166, 247, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(40, 40, 57, 0.25);
+  --bl-glass-bg-heavy: rgba(40, 40, 57, 0.55);
+  --bl-topbar-bg: rgba(24, 24, 37, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(202, 166, 247, 0.3), 0 0 60px rgba(202, 166, 247, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="dracula"] {
+  /* Dracula - ESCURO | primary #52fa7c */
+  /* Backgrounds */
+  --bl-bg-0: #23252f;
+  --bl-bg-1: #2a2b37;
+  --bl-bg-2: #363845;
+  --bl-bg-3: #40424f;
+  --bl-bg-4: #4b4d5a;
+  --bl-bg-5: #575964;
+  --bl-bg-primary: #23252f;
+  --bl-bg-elevated: #40424f;
+  --bl-bg-surface: #363845;
+  --bl-bg-surface-alt: #40424f;
+  --bl-bg-input: #282935;
+  --bl-bg-card: rgba(54, 56, 69, 0.35);
+  --bl-bg-card-solid: rgba(64, 66, 79, 0.65);
+  --bl-bg-card-hover: rgba(75, 77, 90, 0.75);
+  /* Texto */
+  --bl-text-primary: #f8f8f2;
+  --bl-text-secondary: #e0e2e2;
+  --bl-text-dim: #c4c8ce;
+  --bl-text-muted: #9aa0b0;
+  --bl-text-ghost: #646976;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #52fa7c;
+  --bl-green-dim: rgba(82, 250, 124, 0.15);
+  --bl-green-glow: rgba(82, 250, 124, 0.25);
+  --bl-green-soft: rgba(82, 250, 124, 0.08);
+  --bl-green-rgb: 82, 250, 124;
+  --bl-green-300: #8ffcaa;
+  --bl-accent: #52fa7c;
+  --bl-accent-dim: rgba(82, 250, 124, 0.15);
+  --bl-accent-glow: rgba(82, 250, 124, 0.25);
+  --bl-accent-rgb: 82, 250, 124;
+  /* Status */
+  --bl-success: #52fa7c;
+  --bl-info: #8be8fd;
+  --bl-warning: #f1fa89;
+  --bl-danger: #ff5757;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(82, 250, 124, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(54, 56, 69, 0.25);
+  --bl-glass-bg-heavy: rgba(54, 56, 69, 0.55);
+  --bl-topbar-bg: rgba(35, 37, 47, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(82, 250, 124, 0.3), 0 0 60px rgba(82, 250, 124, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="nord"] {
+  /* Nord - ESCURO | primary #87bfcf */
+  /* Backgrounds */
+  --bl-bg-0: #22272f;
+  --bl-bg-1: #292d38;
+  --bl-bg-2: #353a46;
+  --bl-bg-3: #3f4550;
+  --bl-bg-4: #4b505a;
+  --bl-bg-5: #565b65;
+  --bl-bg-primary: #22272f;
+  --bl-bg-elevated: #3f4550;
+  --bl-bg-surface: #353a46;
+  --bl-bg-surface-alt: #3f4550;
+  --bl-bg-input: #272b35;
+  --bl-bg-card: rgba(53, 58, 70, 0.35);
+  --bl-bg-card-solid: rgba(63, 69, 80, 0.65);
+  --bl-bg-card-hover: rgba(75, 80, 90, 0.75);
+  /* Texto */
+  --bl-text-primary: #d8dee9;
+  --bl-text-secondary: #c8cfdd;
+  --bl-text-dim: #b4bdce;
+  --bl-text-muted: #96a2b8;
+  --bl-text-ghost: #626b7a;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #87bfcf;
+  --bl-green-dim: rgba(135, 191, 207, 0.15);
+  --bl-green-glow: rgba(135, 191, 207, 0.25);
+  --bl-green-soft: rgba(135, 191, 207, 0.08);
+  --bl-green-rgb: 135, 191, 207;
+  --bl-green-300: #b1d5e0;
+  --bl-accent: #87bfcf;
+  --bl-accent-dim: rgba(135, 191, 207, 0.15);
+  --bl-accent-glow: rgba(135, 191, 207, 0.25);
+  --bl-accent-rgb: 135, 191, 207;
+  /* Status */
+  --bl-success: #a4bf8d;
+  --bl-info: #8fbcbb;
+  --bl-warning: #ebca89;
+  --bl-danger: #be6069;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(135, 191, 207, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(53, 58, 70, 0.25);
+  --bl-glass-bg-heavy: rgba(53, 58, 70, 0.55);
+  --bl-topbar-bg: rgba(34, 39, 47, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(135, 191, 207, 0.3), 0 0 60px rgba(135, 191, 207, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="vercel"] {
+  /* Vercel - ESCURO | primary #ffffff */
+  /* Backgrounds */
+  --bl-bg-0: #000000;
+  --bl-bg-1: #121212;
+  --bl-bg-2: #1a1a1a;
+  --bl-bg-3: #262626;
+  --bl-bg-4: #333333;
+  --bl-bg-5: #404040;
+  --bl-bg-primary: #000000;
+  --bl-bg-elevated: #262626;
+  --bl-bg-surface: #1a1a1a;
+  --bl-bg-surface-alt: #262626;
+  --bl-bg-input: #0d0d0d;
+  --bl-bg-card: rgba(26, 26, 26, 0.35);
+  --bl-bg-card-solid: rgba(38, 38, 38, 0.65);
+  --bl-bg-card-hover: rgba(51, 51, 51, 0.75);
+  /* Texto */
+  --bl-text-primary: #ededed;
+  --bl-text-secondary: #d8d8d8;
+  --bl-text-dim: #bfbfbf;
+  --bl-text-muted: #999999;
+  --bl-text-ghost: #545454;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #ffffff;
+  --bl-green-dim: rgba(255, 255, 255, 0.15);
+  --bl-green-glow: rgba(255, 255, 255, 0.25);
+  --bl-green-soft: rgba(255, 255, 255, 0.08);
+  --bl-green-rgb: 255, 255, 255;
+  --bl-green-300: #ffffff;
+  --bl-accent: #ffffff;
+  --bl-accent-dim: rgba(255, 255, 255, 0.15);
+  --bl-accent-glow: rgba(255, 255, 255, 0.25);
+  --bl-accent-rgb: 255, 255, 255;
+  /* Status */
+  --bl-success: #3392ff;
+  --bl-info: #3392ff;
+  --bl-warning: #dd901d;
+  --bl-danger: #e60000;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(255, 255, 255, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(26, 26, 26, 0.25);
+  --bl-glass-bg-heavy: rgba(26, 26, 26, 0.55);
+  --bl-topbar-bg: rgba(0, 0, 0, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="retro-terminal"] {
+  /* Retro Terminal - ESCURO | primary #00ff41 */
+  /* Backgrounds */
+  --bl-bg-0: #050505;
+  --bl-bg-1: #0d0d0d;
+  --bl-bg-2: #161816;
+  --bl-bg-3: #1e241e;
+  --bl-bg-4: #2c312c;
+  --bl-bg-5: #393e39;
+  --bl-bg-primary: #050505;
+  --bl-bg-elevated: #1e241e;
+  --bl-bg-surface: #161816;
+  --bl-bg-surface-alt: #1e241e;
+  --bl-bg-input: #0b0b0b;
+  --bl-bg-card: rgba(22, 24, 22, 0.35);
+  --bl-bg-card-solid: rgba(30, 36, 30, 0.65);
+  --bl-bg-card-hover: rgba(44, 49, 44, 0.75);
+  /* Texto */
+  --bl-text-primary: #00ff00;
+  --bl-text-secondary: #16e714;
+  --bl-text-dim: #32cb2d;
+  --bl-text-muted: #5aa052;
+  --bl-text-ghost: #345a2f;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #00ff41;
+  --bl-green-dim: rgba(0, 255, 65, 0.15);
+  --bl-green-glow: rgba(0, 255, 65, 0.25);
+  --bl-green-soft: rgba(0, 255, 65, 0.08);
+  --bl-green-rgb: 0, 255, 65;
+  --bl-green-300: #59ff84;
+  --bl-accent: #00ff41;
+  --bl-accent-dim: rgba(0, 255, 65, 0.15);
+  --bl-accent-glow: rgba(0, 255, 65, 0.25);
+  --bl-accent-rgb: 0, 255, 65;
+  /* Status */
+  --bl-success: #4dff4d;
+  --bl-info: #00ff41;
+  --bl-warning: #e6ac00;
+  --bl-danger: #ff3b3b;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(0, 255, 65, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(22, 24, 22, 0.25);
+  --bl-glass-bg-heavy: rgba(22, 24, 22, 0.55);
+  --bl-topbar-bg: rgba(5, 5, 5, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(0, 255, 65, 0.3), 0 0 60px rgba(0, 255, 65, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="moon"] {
+  /* Moon - lunar quente - ESCURO | primary #fb923c */
+  /* Backgrounds */
+  --bl-bg-0: #0d0e13;
+  --bl-bg-1: #13151c;
+  --bl-bg-2: #1a1d27;
+  --bl-bg-3: #242734;
+  --bl-bg-4: #313440;
+  --bl-bg-5: #3e414c;
+  --bl-bg-primary: #0d0e13;
+  --bl-bg-elevated: #242734;
+  --bl-bg-surface: #1a1d27;
+  --bl-bg-surface-alt: #242734;
+  --bl-bg-input: #111319;
+  --bl-bg-card: rgba(26, 29, 39, 0.35);
+  --bl-bg-card-solid: rgba(36, 39, 52, 0.65);
+  --bl-bg-card-hover: rgba(49, 52, 64, 0.75);
+  /* Texto */
+  --bl-text-primary: #f6f1ea;
+  --bl-text-secondary: #dfdcda;
+  --bl-text-dim: #c3c2c7;
+  --bl-text-muted: #9a9bab;
+  --bl-text-ghost: #5b5c67;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #fb923c;
+  --bl-green-dim: rgba(251, 146, 60, 0.15);
+  --bl-green-glow: rgba(251, 146, 60, 0.25);
+  --bl-green-soft: rgba(251, 146, 60, 0.08);
+  --bl-green-rgb: 251, 146, 60;
+  --bl-green-300: #fcb880;
+  --bl-accent: #fb923c;
+  --bl-accent-dim: rgba(251, 146, 60, 0.15);
+  --bl-accent-glow: rgba(251, 146, 60, 0.25);
+  --bl-accent-rgb: 251, 146, 60;
+  /* Status */
+  --bl-success: #4ade80;
+  --bl-info: #7dafff;
+  --bl-warning: #fbbf24;
+  --bl-danger: #f0596b;
+  /* Bordas */
+  --bl-border-1: rgba(255, 255, 255, 0.04);
+  --bl-border-2: rgba(255, 255, 255, 0.06);
+  --bl-border-3: rgba(255, 255, 255, 0.08);
+  --bl-border-4: rgba(255, 255, 255, 0.12);
+  --bl-border: rgba(255, 255, 255, 0.06);
+  --bl-border-hover: rgba(255, 255, 255, 0.12);
+  --bl-border-accent: rgba(251, 146, 60, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(26, 29, 39, 0.25);
+  --bl-glass-bg-heavy: rgba(26, 29, 39, 0.55);
+  --bl-topbar-bg: rgba(13, 14, 19, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(255, 255, 255, 0.08);
+  --bl-scroll-hover: rgba(255, 255, 255, 0.14);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(251, 146, 60, 0.3), 0 0 60px rgba(251, 146, 60, 0.12);
+  --bl-grid-opacity: 0.02;
+}
+
+[data-theme="light"] {
+  /* Light - CLARO (IS_LIGHT) | primary #0e7490 */
+  /* Backgrounds */
+  --bl-bg-0: #ffffff;
+  --bl-bg-1: #f5f7fb;
+  --bl-bg-2: #edf0f6;
+  --bl-bg-3: #e5e9f2;
+  --bl-bg-4: #d7dbe3;
+  --bl-bg-5: #cacdd5;
+  --bl-bg-primary: #ffffff;
+  --bl-bg-elevated: #edf0f6;
+  --bl-bg-surface: #f5f7fb;
+  --bl-bg-surface-alt: #edf0f6;
+  --bl-bg-input: #ffffff;
+  --bl-bg-card: rgba(15, 16, 20, 0.03);
+  --bl-bg-card-solid: rgba(15, 16, 20, 0.05);
+  --bl-bg-card-hover: rgba(15, 16, 20, 0.07);
+  /* Texto */
+  --bl-text-primary: #0f1014;
+  --bl-text-secondary: #262830;
+  --bl-text-dim: #424652;
+  --bl-text-muted: #6c7284;
+  --bl-text-ghost: #aeb1bb;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #0e7490;
+  --bl-green-dim: rgba(14, 116, 144, 0.15);
+  --bl-green-glow: rgba(14, 116, 144, 0.25);
+  --bl-green-soft: rgba(14, 116, 144, 0.08);
+  --bl-green-rgb: 14, 116, 144;
+  --bl-green-300: #62a5b7;
+  --bl-accent: #0e7490;
+  --bl-accent-dim: rgba(14, 116, 144, 0.15);
+  --bl-accent-glow: rgba(14, 116, 144, 0.25);
+  --bl-accent-rgb: 14, 116, 144;
+  /* Status */
+  --bl-success: #16a34a;
+  --bl-info: #2f6bff;
+  --bl-warning: #b45309;
+  --bl-danger: #dc2626;
+  /* Bordas */
+  --bl-border-1: rgba(0, 0, 0, 0.05);
+  --bl-border-2: rgba(0, 0, 0, 0.08);
+  --bl-border-3: rgba(0, 0, 0, 0.11);
+  --bl-border-4: rgba(0, 0, 0, 0.16);
+  --bl-border: rgba(0, 0, 0, 0.08);
+  --bl-border-hover: rgba(0, 0, 0, 0.16);
+  --bl-border-accent: rgba(14, 116, 144, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(245, 247, 251, 0.55);
+  --bl-glass-bg-heavy: rgba(245, 247, 251, 0.8);
+  --bl-topbar-bg: rgba(255, 255, 255, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(0, 0, 0, 0.18);
+  --bl-scroll-hover: rgba(0, 0, 0, 0.28);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(14, 116, 144, 0.3), 0 0 60px rgba(14, 116, 144, 0.12);
+  --bl-grid-opacity: 0.04;
+}
+
+[data-theme="paper"] {
+  /* Paper - CLARO (IS_LIGHT) | primary #81600e */
+  /* Backgrounds */
+  --bl-bg-0: #f7f4ed;
+  --bl-bg-1: #f2ede3;
+  --bl-bg-2: #e8e3d9;
+  --bl-bg-3: #dad4c8;
+  --bl-bg-4: #cdc7bc;
+  --bl-bg-5: #c0bbb0;
+  --bl-bg-primary: #f7f4ed;
+  --bl-bg-elevated: #e8e3d9;
+  --bl-bg-surface: #f2ede3;
+  --bl-bg-surface-alt: #e8e3d9;
+  --bl-bg-input: #f7f4ed;
+  --bl-bg-card: rgba(42, 38, 34, 0.03);
+  --bl-bg-card-solid: rgba(42, 38, 34, 0.05);
+  --bl-bg-card-hover: rgba(42, 38, 34, 0.07);
+  /* Texto */
+  --bl-text-primary: #2a2622;
+  --bl-text-secondary: #3b3530;
+  --bl-text-dim: #4f4840;
+  --bl-text-muted: #6e6358;
+  --bl-text-ghost: #aca49b;
+  /* Acento + marca (derivam do primary do tema) */
+  --bl-green: #81600e;
+  --bl-green-dim: rgba(129, 96, 14, 0.15);
+  --bl-green-glow: rgba(129, 96, 14, 0.25);
+  --bl-green-soft: rgba(129, 96, 14, 0.08);
+  --bl-green-rgb: 129, 96, 14;
+  --bl-green-300: #ad9862;
+  --bl-accent: #81600e;
+  --bl-accent-dim: rgba(129, 96, 14, 0.15);
+  --bl-accent-glow: rgba(129, 96, 14, 0.25);
+  --bl-accent-rgb: 129, 96, 14;
+  /* Status */
+  --bl-success: #279b51;
+  --bl-info: #266bd9;
+  --bl-warning: #cf8b17;
+  --bl-danger: #c52020;
+  /* Bordas */
+  --bl-border-1: rgba(0, 0, 0, 0.05);
+  --bl-border-2: rgba(0, 0, 0, 0.08);
+  --bl-border-3: rgba(0, 0, 0, 0.11);
+  --bl-border-4: rgba(0, 0, 0, 0.16);
+  --bl-border: rgba(0, 0, 0, 0.08);
+  --bl-border-hover: rgba(0, 0, 0, 0.16);
+  --bl-border-accent: rgba(129, 96, 14, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(242, 237, 227, 0.55);
+  --bl-glass-bg-heavy: rgba(242, 237, 227, 0.8);
+  --bl-topbar-bg: rgba(247, 244, 237, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(0, 0, 0, 0.18);
+  --bl-scroll-hover: rgba(0, 0, 0, 0.28);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(129, 96, 14, 0.3), 0 0 60px rgba(129, 96, 14, 0.12);
+  --bl-grid-opacity: 0.04;
+}
+
+[data-theme="sun"] {
+  /* Sun - dia quente - CLARO (IS_LIGHT) | primary #c44700 (escurecido de #e85600 p/ AA-texto: 4.76:1 sobre bg-primary, 4.56:1 sobre bg-surface) */
+  /* Backgrounds */
+  --bl-bg-0: #fffaf2;
+  --bl-bg-1: #fff4e8;
+  --bl-bg-2: #faecda;
+  --bl-bg-3: #f1e1cd;
+  --bl-bg-4: #e3d4c1;
+  --bl-bg-5: #d4c6b4;
+  --bl-bg-primary: #fffaf2;
+  --bl-bg-elevated: #faecda;
+  --bl-bg-surface: #fff4e8;
+  --bl-bg-surface-alt: #faecda;
+  --bl-bg-input: #fffaf2;
+  --bl-bg-card: rgba(42, 38, 34, 0.03);
+  --bl-bg-card-solid: rgba(42, 38, 34, 0.05);
+  --bl-bg-card-hover: rgba(42, 38, 34, 0.07);
+  /* Texto */
+  --bl-text-primary: #2a2622;
+  --bl-text-secondary: #3e3730;
+  --bl-text-dim: #564b40;
+  --bl-text-muted: #7a6a58;
+  --bl-text-ghost: #b6ab9d;
+  /* Acento + marca (derivam do primary do tema; escurecido p/ AA quando usado como texto/link em components.css) */
+  --bl-green: #c44700;
+  --bl-green-dim: rgba(196, 71, 0, 0.15);
+  --bl-green-glow: rgba(196, 71, 0, 0.25);
+  --bl-green-soft: rgba(196, 71, 0, 0.08);
+  --bl-green-rgb: 196, 71, 0;
+  --bl-green-300: #e09159;
+  --bl-accent: #c44700;
+  --bl-accent-dim: rgba(196, 71, 0, 0.15);
+  --bl-accent-glow: rgba(196, 71, 0, 0.25);
+  --bl-accent-rgb: 196, 71, 0;
+  /* Status */
+  --bl-success: #1f9d52;
+  --bl-info: #2563d9;
+  --bl-warning: #c97a0a;
+  --bl-danger: #c5281f;
+  /* Bordas */
+  --bl-border-1: rgba(0, 0, 0, 0.05);
+  --bl-border-2: rgba(0, 0, 0, 0.08);
+  --bl-border-3: rgba(0, 0, 0, 0.11);
+  --bl-border-4: rgba(0, 0, 0, 0.16);
+  --bl-border: rgba(0, 0, 0, 0.08);
+  --bl-border-hover: rgba(0, 0, 0, 0.16);
+  --bl-border-accent: rgba(196, 71, 0, 0.2);
+  /* Glass / topbar */
+  --bl-glass-bg: rgba(255, 244, 232, 0.55);
+  --bl-glass-bg-heavy: rgba(255, 244, 232, 0.8);
+  --bl-topbar-bg: rgba(255, 250, 242, 0.85);
+  /* Scrollbar */
+  --bl-scroll-thumb: rgba(0, 0, 0, 0.18);
+  --bl-scroll-hover: rgba(0, 0, 0, 0.28);
+  /* Glow + grid */
+  --bl-glow-green: 0 0 20px rgba(196, 71, 0, 0.3), 0 0 60px rgba(196, 71, 0, 0.12);
+  --bl-grid-opacity: 0.04;
+}
+
+/* ============================================================================
+ * FUNDOS DECORADOS OPCIONAIS (adaptados a --bl-*)
+ * ----------------------------------------------------------------------------
+ * Aplicar num container (ex.: <body class="bl-bg-void">). Reagem ao tema ativo
+ * via var(--bl-border) e var(--bl-accent). 100% opcionais.
+ * ============================================================================ */
+
+/* Void -- grid sutil + gradiente radial do acento */
+.bl-bg-void {
+  background-color: var(--bl-bg-primary);
+  background-image:
+    radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      color-mix(in srgb, var(--bl-accent) 12%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(color-mix(in srgb, var(--bl-border) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--bl-border) 60%, transparent) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    var(--bl-grid-size, 32px) var(--bl-grid-size, 32px),
+    var(--bl-grid-size, 32px) var(--bl-grid-size, 32px);
+}
+
+/* Synthwave -- horizonte com glow do acento + grid em perspectiva */
+.bl-bg-synthwave {
+  background-color: var(--bl-bg-primary);
+  background-image:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--bl-accent) 10%, transparent) 70%,
+      color-mix(in srgb, var(--bl-accent) 22%, transparent) 100%
+    ),
+    linear-gradient(color-mix(in srgb, var(--bl-border) 80%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--bl-border) 80%, transparent) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    var(--bl-grid-size, 32px) var(--bl-grid-size, 32px),
+    var(--bl-grid-size, 32px) var(--bl-grid-size, 32px);
+}
+
+/* Terminal retro -- scanlines + vinheta curva de tela */
+.bl-bg-terminal {
+  background-color: var(--bl-bg-primary);
+  background-image:
+    radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 70%,
+      color-mix(in srgb, var(--bl-border) 40%, transparent) 100%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--bl-accent) 6%, transparent) 0px,
+      color-mix(in srgb, var(--bl-accent) 6%, transparent) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+}
+
+/* ============================================================================
+ * TEMAS DISPONIVEIS (15) -- id usado em [data-theme="<id>"]
+ *   ESCUROS (12): bos (default), gestao, dark, midnight-blue, synthwave,
+ *                 solarized-dark, catppuccin, dracula, nord, vercel,
+ *                 retro-terminal, moon
+ *   CLAROS  (3):  light, paper, sun
+ *
+ * COMO ADICIONAR UM TEMA NOVO:
+ *   1. Acrescente a paleta-fonte (modelo: background/foreground/
+ *      surface-0..3/primary/border/success/warning/destructive/info/...) em
+ *      palettes.md.
+ *   2. Resolva-a pelo mapping-contract.md (backgrounds = rampa S0..S3 + elevate;
+ *      texto = rampa FG->MUTFG; acento = derive tudo do primary; bordas/scroll =
+ *      alpha de BRANCO se escuro / PRETO se claro; glass alpha alto no claro).
+ *   3. Emita um novo bloco [data-theme="<novo-id>"] com os ~47 tokens temaveis
+ *      -- NUNCA redeclare tokens estruturais (radius/fontes/spacing/transitions/
+ *      z-index/layout/paleta semantica fixa) nem --bl-green-100..900 (exceto
+ *      --bl-green-300).
+ *   4. Rode o checklist WCAG (mapping-contract sec.3, pares C1-C12) antes de aceitar.
+ * ============================================================================ */

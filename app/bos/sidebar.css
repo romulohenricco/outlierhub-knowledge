@@ -1,0 +1,123 @@
+/* ============================================================
+   SIDEBAR — DS site
+   Rail fixo (64px) com ícones-âncora pras seções da página
+   ============================================================ */
+
+.bl-sidebar {
+  position: fixed;
+  top: var(--bl-topbar-h, 56px);
+  left: 0;
+  bottom: 0;
+  width: 64px;
+  background: var(--bl-bg-1);
+  border-right: 1px solid var(--bl-border-2);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bl-border-3) transparent;
+}
+
+.bl-sidebar::-webkit-scrollbar { width: 4px; }
+.bl-sidebar::-webkit-scrollbar-track { background: transparent; }
+.bl-sidebar::-webkit-scrollbar-thumb { background: var(--bl-border-3); border-radius: 2px; }
+
+/* ── Rail item (ícone âncora) ── */
+.bl-sidebar__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--bl-radius-md, 8px);
+  background: transparent;
+  border: none;
+  color: var(--bl-text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bl-sidebar__item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--bl-text-primary);
+}
+
+.bl-sidebar__item.is-active {
+  background: rgba(var(--bl-accent-rgb), 0.12);
+  color: var(--bl-accent);
+}
+
+.bl-sidebar__item.is-active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--bl-accent);
+  border-radius: 0 2px 2px 0;
+}
+
+.bl-sidebar__item-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Tooltip on hover (texto da seção) ── */
+.bl-sidebar__item[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bl-bg-3);
+  border: 1px solid var(--bl-border-3);
+  color: var(--bl-text-primary);
+  padding: 6px 10px;
+  border-radius: var(--bl-radius-sm, 6px);
+  font-family: var(--bl-font-mono, 'IBM Plex Mono', monospace);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+}
+
+.bl-sidebar__item:hover[data-tooltip]::after {
+  opacity: 1;
+}
+
+/* ── Divider entre grupos ── */
+.bl-sidebar__divider {
+  width: 24px;
+  height: 1px;
+  background: var(--bl-border-2);
+  margin: 6px 0;
+  flex-shrink: 0;
+}
+
+/* ── Layout: main precisa de padding-left ── */
+.ds-with-sidebar {
+  padding-left: 64px !important;
+}
+
+/* ── Mobile: hide sidebar (DS site = desktop-first) ── */
+@media (max-width: 768px) {
+  .bl-sidebar {
+    display: none;
+  }
+  .ds-with-sidebar {
+    padding-left: 0 !important;
+  }
+}
