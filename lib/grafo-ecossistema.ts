@@ -183,10 +183,22 @@ export function montarGrafoEcossistema(
   return { nodes, edges };
 }
 
+/** Chave de comparação de caminho: separador `/`, sem `/.` nem `/` no fim e letra de
+ *  unidade maiúscula. No Windows o `path` da topologia vem no formato do sistema
+ *  (`X:\pasta\skill`, de path.resolve) e o de `pathAbsoluto` junta com `/`: sem isto
+ *  os dois lados nunca casam. */
+const chaveCaminho = (p: string) =>
+  p
+    .replace(/\\/g, "/")
+    .replace(/^([a-z]):/, (_, u: string) => `${u.toUpperCase()}:`)
+    .replace(/\/\.$/, "")
+    .replace(/\/+$/, "");
+
 /**
  * Ponte entre camadas: com ecossistema E topologia ligados, a skill do
  * inventário e a pasta dela no disco viram o mesmo lugar (`mora em`). Só casa
- * path idêntico: aproximar por prefixo ligaria tudo à pasta-mãe.
+ * path idêntico (a menos do separador, ver `chaveCaminho`): aproximar por
+ * prefixo ligaria tudo à pasta-mãe.
  */
 export function ligarEcossistemaATopologia(
   eco: Pick<NoEcossistema, "id" | "path" | "estrutural">[],
@@ -194,12 +206,12 @@ export function ligarEcossistemaATopologia(
   idBase: number,
 ): ArestaEcossistema[] {
   const topoPorPath = new Map<string, string>();
-  for (const t of topo) if (t.path) topoPorPath.set(t.path.replace(/\/$/, ""), t.id);
+  for (const t of topo) if (t.path) topoPorPath.set(chaveCaminho(t.path), t.id);
   const out: ArestaEcossistema[] = [];
   let eid = idBase;
   for (const n of eco) {
     if (n.estrutural || !n.path) continue;
-    const alvo = topoPorPath.get(n.path.replace(/\/$/, ""));
+    const alvo = topoPorPath.get(chaveCaminho(n.path));
     if (alvo)
       out.push({ id: eid--, src: n.id, rel: "mora em", dst: alvo, status: "confirmed", n_fontes: 1, peso: 1, camada: "ecossistema" });
   }

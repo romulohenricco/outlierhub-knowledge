@@ -137,6 +137,23 @@ export async function getBookIndex(): Promise<Map<string, string>> {
 }
 
 /**
+ * Índice leve caminho de origem→arquivo, só das entradas geradas a partir do Megabrain
+ * (`origem` "mega-brain/…", gravadas por `npm run populate`; as manuais nunca entram): liga
+ * um documento de /colecao ao nó dele no grafo, que usa a identidade da estante
+ * (`livro:<arquivo>`). Catálogo demo = índice vazio.
+ */
+export async function getArquivoPorOrigem(): Promise<Map<string, string>> {
+  const { livros, demo } = await load();
+  const out = new Map<string, string>();
+  if (demo) return out;
+  for (const l of livros) {
+    const origemPath = l.proveniencia?.origemPath;
+    if (typeof origemPath === "string" && l.origem?.startsWith("mega-brain/")) out.set(origemPath, l.arquivo);
+  }
+  return out;
+}
+
+/**
  * Cobertura de ontologia dos livros SEM stat de capa (usa o cache do catálogo).
  * comRelacoes conta só livros com vizinhos kNN não-vazios.
  */

@@ -4,6 +4,22 @@ Sua base de conhecimento com uma interface visual: biblioteca com leitor, busca,
 
 **Gratuito e de código aberto, sob a licença MIT.** A demonstração inclui apenas documentos e capas originais deste projeto. Não inclui livros comerciais, cursos, dados de alunos, contas, chaves ou a engine Megabrain.
 
+## De onde vêm os dados
+
+| Peça | Onde está | Papel |
+|---|---|---|
+| Repositório Megabrain Free (open source) | <https://github.com/thiagofinch/mega-brain> | A base de conhecimento. É dela que o `npm run populate` lê o conteúdo que aparece nas telas |
+| App Knowledge (open source) | <https://github.com/romulohenricco/outlierhub-knowledge> | Este app: o código das telas (estante, busca, grafo, kanban, agente…) |
+| Pasta onde o Knowledge fica | `[mega-brain]\apps\knowledge` (no macOS e no Linux, `[mega-brain]/apps/knowledge`) | Clone deste repositório dentro do seu Megabrain. `[mega-brain]` é a pasta onde você clonou o Megabrain Free |
+
+Como os dados chegam às telas:
+
+1. Você clona o Megabrain Free e, dentro dele, clona este app em `apps/knowledge`.
+2. O `npm run populate` lê o Megabrain em que o app está (a pasta `[mega-brain]`, dois níveis acima do app), inclusive o que você ingeriu nele, e grava o resultado só em `data/`, dentro do app.
+3. `data/` e `.env.local` ficam no seu computador: o git os ignora, nada é enviado ao GitHub e o app só abre em `127.0.0.1`.
+
+Sem o Megabrain, o app abre no modo demo, com os exemplos deste repositório (veja [Experimentar sem Megabrain](#experimentar-sem-megabrain)).
+
 ## Antes de começar
 
 - Node.js **22.13 ou superior**; prefira uma versão LTS suportada (22 ou 24).
@@ -82,6 +98,49 @@ O app não importa sua base automaticamente. O card fornece instruções para se
 
 Se a pergunta não aparecer, consulte [docs/megabrain.md](docs/megabrain.md). A variável opcional `BILHON_MEGABRAIN_ROOT` permite indicar uma instalação em outro lugar.
 
+Prefere sem agente? O `npm run populate`, descrito abaixo, importa o Megabrain direto e responde essa pergunta por você.
+
+## Popular com o Megabrain (`npm run populate`)
+
+Com o app em `apps/knowledge`, um comando preenche as telas com o conteúdo do **seu** Megabrain, sem agente, sem Supabase, sem Ollama e sem rede. Num segundo terminal, na pasta do app:
+
+```sh
+npm run populate            # mostra quantos arquivos entram e pergunta antes de gravar
+npm run populate -- --yes   # sem perguntar
+npm run populate:status     # resultado da última população
+```
+
+Depois, reinicie o `npm run dev` (`Ctrl+C` e de novo): o app só lê os dados e o `.env.local` ao iniciar.
+
+- O Megabrain é **somente lido**. O comando grava só em `data/` e num bloco gerenciado no fim do `.env.local` (`# >>> populate-megabrain`). O que estiver fora do bloco é seu e não é tocado. Variável que você já definiu fora do bloco, com valor (como `BILHON_KNOWLEDGE_PROVIDER=supabase`, `BILHON_ROOT` ou `BILHON_REGISTRO_ENTIDADES`), vence: o bloco não a grava e o comando avisa o que isso muda (para usar o valor do populate, apague a sua linha).
+- Liga o provider `local` (busca por palavras e grafo a partir de `data/`) quando o índice de busca fica utilizável; senão o app continua no modo demo e o comando diz por quê. Detalhes em [docs/provider-local.md](docs/provider-local.md).
+- Monta a `/ontologia` com as camadas de DNA dos especialistas (`knowledge/{external,business}/dna/persons/`), cada item com a fonte no Megabrain, em `data/ontologia/ontologia.yaml`; um manifesto seu nessa pasta não é sobrescrito. Veja [docs/ontologia.md](docs/ontologia.md#gerada-pelo-npm-run-populate).
+- Precisa de Node.js 22.13+ e da CLI `sqlite3` (3.35 ou superior) no `PATH`. No Windows ela não vem instalada: veja [docs/dados.md](docs/dados.md#caminhos-e-variáveis).
+- Fica de fora: `knowledge/personal` e `agents/personal` (a não ser com `--include-personal`), todo arquivo com cara de segredo (`.env`, chaves, tokens) e link simbólico ou junction (o comando não sai da pasta do Megabrain por eles; os de primeiro nível aparecem com o motivo `link-ou-junction`). Exemplo de documentação (`your-api-key-here`, `xxxx…`, `<sua-chave>`, `user:pass@host`) não tira o arquivo do corpus. `populate:status` lista o que foi excluído, sem mostrar valores.
+- Rodar de novo atualiza o que veio do Megabrain e preserva o que é seu: cards criados à mão, favoritos, anotações e livros que você acrescentou.
+- Para barrar arquivos específicos do Megabrain lido (por exemplo, cópias de um repositório privado), defina `BILHON_POPULATE_EXCLUIR` no terminal ou no `.env.local` (fora do bloco `populate-megabrain`; o terminal vence o arquivo): caminhos relativos à raiz do Megabrain, separados por vírgula ou ponto e vírgula, com `/` ou `\`, aceitando glob simples (`*` não passa de uma pasta, `**` passa; o caminho de uma pasta exclui tudo dentro dela). Exemplo: `BILHON_POPULATE_EXCLUIR=docs/privado.md;squads/secreto/**;engine/**/modulo_privado.py`. O arquivo excluído não é lido nem gravado em lugar nenhum de `data/` (estante, coleções, busca, grafo, topologia, agente, add-ons, kanban, referências, especialistas, ontologia); na topologia, no máximo o nó do caminho aparece, como referência citada por outro documento, sem conteúdo. Ele entra na lista de excluídos com o motivo `excluido-pela-configuracao`, e o log do comando e o `populate:status` (campos `corpus.excluidosPelaConfiguracao` e `exclusaoConfigurada`) mostram quantos e quais. Entrada que não casa nenhum arquivo (erro de digitação) ou que sai da raiz (`..`) gera aviso. O que já tinha sido gravado antes da exclusão sai na próxima população.
+
+Opções, depois de `--`: `--only livros,busca`, `--skip kanban`, `--dry-run` (só mostra o que entraria) e `--repo <pasta>` para um Megabrain em outro lugar (ou `BILHON_MEGABRAIN_ROOT`, no terminal ou no `.env.local`).
+
+### Só o conteúdo do Megabrain público (clone limpo)
+
+Para mostrar apenas o que está no repositório aberto ([thiagofinch/mega-brain](https://github.com/thiagofinch/mega-brain)), e não o seu Megabrain local (que pode ter conteúdo privado), faça um clone limpo ao lado do app e aponte o populate para ele. Na pasta `apps/` do Megabrain:
+
+```sh
+git clone https://github.com/thiagofinch/mega-brain.git mega-brain-oss
+```
+
+Depois, na área sua do `.env.local`, **fora** do bloco `populate-megabrain`:
+
+```
+BILHON_MEGABRAIN_ROOT=../mega-brain-oss
+BILHON_ROOT=..
+```
+
+- `BILHON_MEGABRAIN_ROOT` (relativo à pasta do app) diz qual Megabrain o `npm run populate` lê, e o app a usa na pergunta de primeiro uso. O `.env.local` vale para qualquer `npm run populate`, sem nada no terminal; o terminal, se definir a variável, vence o arquivo, e `--repo` vence os dois.
+- `BILHON_ROOT` é a raiz que contém o app **e** o clone (aqui, a pasta `apps/`). O populate grava então os caminhos do registro do Agente com o prefixo da raiz até o clone (`mega-brain-oss/squads/...`) e eles resolvem. Sem ela, o clone fica fora da raiz do app e o comando avisa.
+- Para atualizar o conteúdo: `git -C ../mega-brain-oss pull` e `npm run populate -- --yes`. O clone é só lido; o populate nunca grava nele.
+
 ## Parte 3: Conheça as páginas
 
 | Página | Endereço | Uso |
@@ -95,7 +154,7 @@ Se a pergunta não aparecer, consulte [docs/megabrain.md](docs/megabrain.md). A 
 | Backlog | `/kanban/backlog` | Histórico completo de tarefas |
 | Agente | `/agente` | Inventário e grafo dos agentes que você cadastrar |
 | Integrações | `/integracoes` | Padrões e componentes cadastrados localmente |
-| Ontologia | `/ontologia` | Camadas e relações definidas em um manifesto seu |
+| Ontologia | `/ontologia` | Camadas e relações definidas em um manifesto seu, ou as camadas de DNA dos especialistas montadas pelo `npm run populate` |
 | Minhas redes | `/mysocialmedia` | Inventários pessoais de Instagram e YouTube |
 
 A raiz `/` abre a Estante. Telas de integrações pessoais começam vazias: o app não entra nas suas contas nem lê dados de outra pessoa.
@@ -144,7 +203,7 @@ npm run build
 npm start
 ```
 
-O app continua em `127.0.0.1:3300`. `npm run dev -- --port 3301` permite usar outra porta local; ajuste o endereço no navegador.
+O app continua em `127.0.0.1:3300`. Para usar outra porta local, defina `PORT=3301` no `.env.local` (fora do bloco do populate) ou no terminal; `npm run dev` e `npm start` passam a usá-la. `PORT` do terminal vence a do `.env.local`; no arquivo vale a última linha `PORT=`, como no Next (em branco = 3300), e uma porta inválida interrompe o início com uma mensagem que diz de onde ela veio. Para uma vez só, `npm run dev -- --port 3301`. Ajuste o endereço no navegador.
 
 ## Rede e privacidade
 
@@ -160,7 +219,8 @@ Este é um app local/pessoal, com um único usuário autorizado quando configura
 | --- | --- |
 | Node incompatível | Use Node LTS 22.13+ ou 24 |
 | `npm` bloqueado no PowerShell | Use `npm.cmd ci` / `npm.cmd run dev` |
-| Porta 3300 ocupada | Use `npm run dev -- --port 3301` e abra 3301 |
+| Porta 3300 ocupada | Defina `PORT=3301` no `.env.local` (ou use `npm run dev -- --port 3301`) e abra 3301; `PORT` no terminal vence o `.env.local` |
+| Telas continuam no demo depois do populate | Reinicie o `npm run dev`; confira `npm run populate:status` e os avisos do comando (por exemplo, `sqlite3` ausente) |
 | Primeira tela demora | Aguarde a compilação; mantenha o terminal aberto |
 | Nenhum dado pessoal aparece | É esperado no demo; importe/configure sua própria base |
 | `sqlite3`, `pdftotext` ou `yt-dlp` ausente | Ferramentas opcionais das integrações, não necessárias para navegar no demo e ler os PDFs |

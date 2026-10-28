@@ -14,24 +14,26 @@ import {
   BookOpen,
   Star,
   Ban,
-  Instagram,
-  Youtube,
-  Linkedin,
+  Camera,
+  SquarePlay,
+  Briefcase,
   Link2,
   Globe,
   MonitorPlay,
   Wand2,
+  type LucideIcon,
 } from "lucide-react";
 import { Secao, ListaExpansivel, linhaCls, COR_CAT } from "./Filtros";
 import { usePagePanel } from "./PagePanel";
 
 const COR_SECAO = COR_CAT;
 
-// cor de marca por plataforma (redes sociais na cor da mídia)
-const BRAND: Record<string, { cor: string; rgb: string; Icon: typeof Instagram }> = {
-  instagram: { cor: "#e1306c", rgb: "225,48,108", Icon: Instagram },
-  youtube: { cor: "#ff0000", rgb: "255,0,0", Icon: Youtube },
-  linkedin: { cor: "#0a66c2", rgb: "10,102,194", Icon: Linkedin },
+// cor de marca por plataforma (redes sociais na cor da mídia). O lucide-react 1.x
+// removeu os ícones de marca: cada rede usa um ícone genérico, reconhecível pela cor.
+const BRAND: Record<string, { cor: string; rgb: string; Icon: LucideIcon }> = {
+  instagram: { cor: "#e1306c", rgb: "225,48,108", Icon: Camera },
+  youtube: { cor: "#ff0000", rgb: "255,0,0", Icon: SquarePlay },
+  linkedin: { cor: "#0a66c2", rgb: "10,102,194", Icon: Briefcase },
   pinterest: { cor: "#e60023", rgb: "230,0,35", Icon: Link2 },
   behance: { cor: "#1769ff", rgb: "23,105,255", Icon: Link2 },
   tiktok: { cor: "#25f4ee", rgb: "37,244,238", Icon: Link2 },
@@ -594,7 +596,7 @@ export function Referencias({
                   )}
                   {p.youtube && (
                     <p className="mt-1 flex items-center gap-1.5 text-[10px] text-white/30">
-                      <Youtube className="h-3 w-3 shrink-0 text-[#ff0000]/70" />
+                      <SquarePlay className="h-3 w-3 shrink-0 text-[#ff0000]/70" />
                       {[
                         duracaoHumana(p.youtube.duracao),
                         p.youtube.views

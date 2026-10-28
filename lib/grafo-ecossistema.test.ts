@@ -137,4 +137,15 @@ describe("ligarEcossistemaATopologia", () => {
       rel: "mora em",
     });
   });
+
+  it("casa o path da topologia no formato do Windows (\\ e unidade) com o de pathAbsoluto (/)", () => {
+    const g = montarGrafoEcossistema(ENTIDADES, { raiz: "x:\\raiz" });
+    const topo = [
+      { id: "topo:kanban", path: "X:\\raiz\\skills\\kanban" },
+      // pasta-mãe não pode casar: a comparação continua exata, só o separador muda
+      { id: "topo:skills", path: "X:\\raiz\\skills\\" },
+    ];
+    const arestas = ligarEcossistemaATopologia(g.nodes, topo, ECO_EDGE_ID_BASE - 10_000);
+    expect(arestas.map((a) => [a.src, a.dst])).toEqual([[`${ECO_PREFIXO}skill:x:kanban`, "topo:kanban"]]);
+  });
 });

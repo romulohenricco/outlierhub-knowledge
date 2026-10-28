@@ -3,11 +3,13 @@
  * do macOS (read-only, zero deps nativas). Escrita é exclusiva do kg-extract.py.
  */
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { getBooks, getBookIndex, LIVROS_DIR } from "./catalog";
 import { getReferencias, REFS_DIR } from "./referencias";
+import { bilhonRoot, caminhoDentroDaRaiz } from "./bilhon-paths";
 import { diasDoDisco } from "./datas-disco";
 import { dataMinima } from "./grafo-data";
 import { cortaTexto } from "./texto";
@@ -17,6 +19,9 @@ const exec = promisify(execFile);
 
 export const KG_DB =
   process.env.BILHON_KG_DB || path.join(process.cwd(), "data", "kg", "livros-kg.sqlite");
+
+/** Manifesto que o `npm run populate` grava ao lado do sqlite (scripts/populate/grafo.mjs). */
+const KG_MANIFESTO = path.join(path.dirname(KG_DB), "populate-grafo.json");
 
 /** Qual das 3 camadas do canvas o nó/aresta habita. Ausente =
  *  "conhecimento" — o campo é opcional pra não exigir reescrita das leituras
@@ -218,12 +223,57 @@ export async function grafo(opts: {
   return { nodes, edges };
 }
 
+let raizDoGrafoCache: { chave: string; raiz: string | null } | null = null;
+
+/**
+ * Raiz do repositório que GEROU o sqlite em uso, contra a qual as fontes
+ * `yt-<coleção>:<caminho>` são resolvidas. Só existe quando dá para comprovar:
+ *  - o manifesto do populate (ao lado do KG_DB) descreve ESTE sqlite: `sqliteSha256`
+ *    confere, o mesmo teste com que o grafo.mjs reconhece o que gerou;
+ *  - o manifesto declara a raiz em `raiz` (relativa à pasta do manifesto, ou absoluta);
+ *  - essa raiz fica dentro de BILHON_ROOT (a leitura do app não sai da raiz permitida).
+ * Fora disso, null. Com `--repo` externo o populate não grava BILHON_ROOT e a raiz
+ * vira a pasta do app: resolver ali faria `yt-docs:README.md` pegar o mtime do README
+ * do PRÓPRIO app — data errada com cara de certa. Sem comprovação, fica sem data.
+ * Cache pelo mtime/tamanho do sqlite e do manifesto (o hash só é refeito se mudarem).
+ */
+async function raizDoGrafo(): Promise<string | null> {
+  let chave: string;
+  try {
+    const [db, man] = await Promise.all([stat(KG_DB), stat(KG_MANIFESTO)]);
+    chave = `${db.mtimeMs}:${db.size}:${man.mtimeMs}:${man.size}`;
+  } catch {
+    return null; // sem manifesto: grafo de outro extrator (kg-extract.py, por exemplo)
+  }
+  if (raizDoGrafoCache?.chave !== chave) {
+    let raiz: string | null = null;
+    try {
+      const m = JSON.parse(await readFile(KG_MANIFESTO, "utf-8")) as { sqliteSha256?: unknown; raiz?: unknown };
+      if (typeof m.raiz === "string" && m.raiz && typeof m.sqliteSha256 === "string") {
+        const sha = createHash("sha256").update(await readFile(KG_DB)).digest("hex");
+        if (sha === m.sqliteSha256) raiz = path.resolve(path.dirname(KG_MANIFESTO), m.raiz);
+      }
+    } catch {
+      /* manifesto ilegível: não comprova nada */
+    }
+    raizDoGrafoCache = { chave, raiz };
+  }
+  const raiz = raizDoGrafoCache.raiz;
+  return raiz && caminhoDentroDaRaiz(bilhonRoot(), raiz) ? raiz : null;
+}
+
 /**
  * Data dos nós do conhecimento (o sqlite não tem timestamp nenhum):
  *  - livro → mtime do arquivo em LIVROS_DIR (≈ quando entrou no acervo)
+ *  - fonte `yt-<coleção>:<caminho>` fora da estante (config/código de um Megabrain
+ *    populado) → mtime de `<raiz do repositório que gerou o grafo>/<caminho>`, só
+ *    quando essa raiz é comprovada (raizDoGrafo) e o arquivo existe dentro dela;
+ *    transcrição de vídeo não tem arquivo lá e continua sem data. Livro da estante
+ *    cujo nome começa com `yt-` (ex.: `yt-guia.pdf`) não casa o formato: fica só
+ *    com a data da estante
  *  - conceito → a obra MAIS ANTIGA entre as evidências das arestas mostradas,
  *    ou seja, desde quando o acervo sustenta aquele conceito
- * Fonte sem arquivo no catálogo fica sem data — ausente em vez de inventada.
+ * Fonte sem arquivo fica sem data — ausente em vez de inventada.
  */
 async function datasDoConhecimento(
   edges: KgEdge[],
@@ -245,6 +295,31 @@ async function datasDoConhecimento(
     `SELECT DISTINCT edge_id, livro FROM evidences
      WHERE edge_id IN (${edges.map((e) => Number(e.id)).join(",")})`,
   );
+  // fontes fora da estante: `yt-<coleção>:<caminho relativo ao repositório lido>` (evidências
+  // e nós `livro:yt-…`). Só o que casa o formato tem caminho: `livro:yt-guia.pdf` é estante.
+  const relDe = (livro: string) => /^yt-[^:]+:(.+)$/.exec(livro)?.[1];
+  const fontesYt = new Set<string>();
+  for (const r of ev) if (relDe(r.livro)) fontesYt.add(r.livro);
+  for (const e of edges)
+    for (const no of [e.src, e.dst]) {
+      const f = no.startsWith("livro:") ? no.slice("livro:".length) : "";
+      if (relDe(f)) fontesYt.add(f);
+    }
+  const raiz = fontesYt.size ? await raizDoGrafo() : null;
+  const absYt = new Map<string, string>();
+  for (const f of fontesYt) {
+    const rel = relDe(f);
+    if (raiz && rel) absYt.set(f, path.join(raiz, rel));
+  }
+  const diasYt = raiz && absYt.size ? await diasDoDisco([...absYt.values()], raiz) : new Map<string, string>();
+  const diaDaFonte = (livro: string) => {
+    const abs = absYt.get(livro);
+    return diaDoArquivo(livro) ?? (abs ? diasYt.get(abs) : undefined);
+  };
+  for (const f of fontesYt) {
+    const d = diaDaFonte(f);
+    if (d) out.set(`livro:${f}`, d);
+  }
   const livrosDaAresta = new Map<number, string[]>();
   for (const r of ev) {
     const l = livrosDaAresta.get(r.edge_id) ?? [];
@@ -253,7 +328,7 @@ async function datasDoConhecimento(
   }
   const candidatas = new Map<string, Array<string | undefined>>();
   for (const e of edges) {
-    const ds = (livrosDaAresta.get(e.id) ?? []).map(diaDoArquivo);
+    const ds = (livrosDaAresta.get(e.id) ?? []).map(diaDaFonte);
     for (const no of [e.src, e.dst]) {
       if (no.startsWith("livro:")) continue;
       const l = candidatas.get(no) ?? [];

@@ -12,11 +12,11 @@ Nada é obrigatório. O que faltar deixa a tela correspondente vazia ou, em dois
 |---|---|---|
 | Estante (`/estante`; a raiz `/` encaminha para ela), `/livro/<id>`, `/ler/<id>` | `data/livros/catalogo.json` e a pasta `data/livros/arquivos/` | catálogo ausente ou com JSON inválido: mostra os livros de exemplo (`fixtures/demo/`), **seja qual for o provider** |
 | Referências (`/referencias`) | `data/referencias-instagram/referencias.json` | mostra os posts de exemplo (`fixtures/demo/referencias.json`), seja qual for o provider |
-| Busca (`/buscar`) | o provider | `demo`: termos nos livros de exemplo. `supabase`: a sua tabela, ver [`provider-supabase.md`](provider-supabase.md) |
-| Grafo (`/grafo`) | `demo`: `fixtures/demo/grafo.json`. `supabase`: o SQLite `data/kg/livros-kg.sqlite` | `demo` sempre tem grafo. `supabase` sem o SQLite: canvas vazio e **sem mensagem na tela** (a API `/api/graph` responde 503 com o motivo no campo `detalhe`), **sem cair no demo** |
+| Busca (`/buscar`) | o provider | `demo`: termos nos livros de exemplo. `local`: o índice `data/search/index.sqlite`, ver [`provider-local.md`](provider-local.md). `supabase`: a sua tabela, ver [`provider-supabase.md`](provider-supabase.md) |
+| Grafo (`/grafo`) | `demo`: `fixtures/demo/grafo.json`. `local` e `supabase`: o SQLite `data/kg/livros-kg.sqlite` | `demo` sempre tem grafo. `local` ou `supabase` sem o SQLite: canvas vazio e **sem mensagem na tela** (a API `/api/graph` responde 503 com o motivo no campo `detalhe`), **sem cair no demo** |
 | Ingestões (`/ingestoes`), `/colecao/<slug>` | `data/colecoes-external/**/_corpus_bge.sqlite` | lista vazia |
 | Kanban (`/kanban`, `/kanban/backlog`) | `data/kanban/board.json` | board vazio com as colunas TO DO, DOING, DONE e CANCEL; o arquivo nasce na primeira gravação |
-| Agente (`/agente`) | registro opcional e `data/agente/` (inclui `organizacao.json` e a pasta `memoria/` do grafo) | página vazia, ver [`agente-registro.md`](agente-registro.md) |
+| Agente (`/agente`) | registro opcional e `data/agente/` (inclui `organizacao.json`, gerado pelo `npm run populate`, e a pasta `memoria/` do grafo, que é sua) | página vazia, ver [`agente-registro.md`](agente-registro.md) |
 | Integrações (`/integracoes`, antes `/addons`) | `data/addons/manifest.json` | vazio, ver [`agente-registro.md`](agente-registro.md#add-ons-e-topologia) |
 | Ontologia (`/ontologia`) | o arquivo YAML/JSON apontado por `BILHON_ONTOLOGIA_MANIFEST` | estado vazio com o formato esperado, ver [`ontologia.md`](ontologia.md) |
 | Personas (aba de `/ingestoes`) | o JSON apontado por `BILHON_PERSONAS_JSON` | aba vazia que explica como popular, ver [`personas.md`](personas.md) |
@@ -35,6 +35,7 @@ Consequência de a estante e as referências não dependerem do provider: com `B
 | Níveis editoriais (autolearning e estante) | `BILHON_NIVEIS` | `data/livros/niveis.json` |
 | Sinopses por livro (estante e página do livro) | `BILHON_LIVROS_SINOPSES` | `livros-sinopses.json`, ao lado do `niveis.json` |
 | Cache do autolearning (o app escreve) | `BILHON_AUTOLEARN_CACHE` | `data/livros/autolearn-cache.json` |
+| Índice da busca do provider `local` | `BILHON_LOCAL_SEARCH_DB` | `data/search/index.sqlite` |
 | Grafo (SQLite) | `BILHON_KG_DB` | `data/kg/livros-kg.sqlite` |
 | Posições pré-calculadas do grafo | `BILHON_GRAPH_LAYOUT` | `data/kg/graph-layout.json` |
 | Mapa de vídeos | `BILHON_YOUTUBE_MAP` | `data/kg/youtube-map.json` |
@@ -47,13 +48,16 @@ Consequência de a estante e as referências não dependerem do provider: com `B
 | Agente | `BILHON_AGENTE_DIR` e as demais do bloco Agente (inclui `BILHON_BRAIN_ORG_JSON` e `BILHON_BRAIN_STORE`, do grafo) | `data/agente` |
 | Add-ons | `BILHON_ADDONS_DIR` | `data/addons` |
 | Ontologia | `BILHON_ONTOLOGIA_MANIFEST` | ausente (a página nasce vazia; o arquivo precisa estar dentro de `BILHON_ROOT`) |
+| Personas | `BILHON_PERSONAS_JSON` | ausente (a aba nasce vazia; o arquivo precisa estar dentro de `BILHON_ROOT`) |
 | Topologia | `BILHON_TOPOLOGY_DIR` | `data/topology` |
 | Minhas redes (raiz das três pastas) | `BILHON_SOCIAL_DIR` | `data/social` |
 | Miniaturas do YouTube em Minhas redes | `BILHON_SOCIAL_YT_MINIATURAS` | desligado (`1` liga) |
 
 Agente, add-ons e topologia só leem e gravam dentro de `BILHON_ROOT` (padrão: a pasta do projeto). Se você mudar `BILHON_ROOT`, as pastas dessas três funções (padrões acima ou as variáveis que as substituem) precisam ficar dentro da nova raiz.
 
-O app lê SQLite pela linha de comando `sqlite3` (grafo e coleções): ela precisa estar no `PATH`. **No Windows ela não vem instalada**: baixe o pacote *sqlite-tools* em <https://www.sqlite.org/download.html>, extraia e ponha a pasta no `PATH` (abra um terminal novo e confira com `sqlite3 --version`). O macOS já traz a CLI; no Linux instale o pacote `sqlite3` se faltar. Sem ela, a lista de coleções fica vazia (sem aviso), `/colecao/<slug>` responde 404 e o grafo do provider `supabase` fica vazio; o modo demo, sem coleções, não precisa.
+O app lê SQLite pela linha de comando `sqlite3` (grafo e coleções): ela precisa estar no `PATH`. **No Windows ela não vem instalada**: baixe o pacote *sqlite-tools* em <https://www.sqlite.org/download.html>, extraia e ponha a pasta no `PATH` (abra um terminal novo e confira com `sqlite3 --version`). O macOS já traz a CLI; no Linux instale o pacote `sqlite3` se faltar. Sem ela, a lista de coleções fica vazia (sem aviso), `/colecao/<slug>` responde 404 e o grafo dos providers `local` e `supabase` fica vazio (com o `local`, a busca também deixa de funcionar); o modo demo, sem coleções, não precisa.
+
+Dentro de um Megabrain, `npm run populate` gera a partir do conteúdo dele (só em `data/`) os arquivos da estante, das coleções, do grafo, da busca, do kanban, das referências, do Agente, das integrações e da topologia, e acerta as variáveis num bloco gerenciado do `.env.local`: veja [megabrain.md](megabrain.md#caminho-direto-npm-run-populate) e [provider-local.md](provider-local.md). O marcador `data/.populated.json` guarda o resultado da última população (`npm run populate:status`).
 
 ## Biblioteca
 
@@ -179,7 +183,7 @@ O botão "prompt de estudo" copia um bloco de contexto (título, caminho do arqu
 
 ## Grafo de conhecimento
 
-Com o provider `supabase`, o grafo vem de um SQLite com três tabelas. Com o provider `demo`, vem de `fixtures/demo/grafo.json` e nada abaixo é necessário.
+Com os providers `local` e `supabase`, o grafo vem de um SQLite com três tabelas. Com o provider `demo`, vem de `fixtures/demo/grafo.json` e nada abaixo é necessário.
 
 Você pode gerar o SQLite com o seu próprio processo, desde que ele tenha exatamente este esquema (é o que o app lê):
 
@@ -626,7 +630,7 @@ Para você saber o que pode aparecer em `data/` sem ter criado:
 | Arquivo | Quando |
 |---|---|
 | `data/kanban/**` | ao criar ou alterar cards, anexar mídia, concluir um ticket |
-| `data/primeiro-uso.json` | ao responder a pergunta de primeiro uso dentro de um Megabrain (veja [megabrain.md](megabrain.md)); apague o arquivo para a pergunta voltar |
+| `data/primeiro-uso.json` | ao responder a pergunta de primeiro uso dentro de um Megabrain (veja [megabrain.md](megabrain.md)), ou por um `npm run populate` completo em que todos os módulos terminaram ok (estado `aceito`, sem card, respondido no fim da população); apague o arquivo para a pergunta voltar |
 | `data/agente/favoritos.json`, `ocultos.json` | ao marcar estrela ou lixeira na página Agente |
 | `data/referencias-instagram/{favoritos,antipatterns,anotacoes,prompts-reversos}.json` | ao favoritar, marcar, anotar ou registrar um prompt reverso (a primeira gravação cria a pasta, se ela não existir) |
 | `data/referencias-instagram/referencias.json` | ao baixar um vídeo (acrescenta `videos` ao post) |
