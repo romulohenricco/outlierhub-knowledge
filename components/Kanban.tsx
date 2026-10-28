@@ -18,14 +18,11 @@ import {
   Copy,
   File,
   FileText,
-  Github,
   GripHorizontal,
   GripVertical,
   ImagePlus,
-  Instagram,
   Lightbulb,
   Link2,
-  Linkedin,
   ListChecks,
   Lock,
   Mic,
@@ -39,11 +36,9 @@ import {
   Search,
   Square,
   Trash2,
-  Twitter,
   User,
   Users,
   X,
-  Youtube,
   type LucideIcon,
 } from "lucide-react";
 import { Secao, ListaExpansivel, linhaCls } from "./Filtros";
@@ -2459,7 +2454,17 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
                         {(h.links?.length ?? 0) > 0 &&
                           h.links!.map((l, j) => {
                             const info = LINK_INFO[l.tipo];
-                            return <info.Icon key={j} size={10} style={{ color: info.cor }} className="shrink-0" />;
+                            // só o ícone aparece: role="img" + aria-label dão o tipo do link ao leitor de tela
+                            return (
+                              <info.Icon
+                                key={j}
+                                size={10}
+                                style={{ color: info.cor }}
+                                className="shrink-0"
+                                role="img"
+                                aria-label={info.rotulo}
+                              />
+                            );
                           })}
                       </button>
                       {h.nota && !abertoAqui && <p className="pl-1 opacity-80">{h.nota}</p>}

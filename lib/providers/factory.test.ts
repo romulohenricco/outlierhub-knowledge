@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 /**
- * Valor de `BILHON_KNOWLEDGE_PROVIDER`: "demo" (padrão) ou "supabase". O valor
+ * Valor de `BILHON_KNOWLEDGE_PROVIDER`: "demo" (padrão), "supabase" ou "local"
+ * (índice FTS5 + grafo em sqlite gerados por `npm run populate`). O valor
  * antigo do provider real segue aceito em silêncio, para não quebrar um
  * `.env.local` já existente, mas não aparece em nenhuma mensagem.
  */
@@ -46,10 +47,20 @@ describe("getKnowledgeProvider", () => {
     expect((await fabrica())()).toBeInstanceOf(real.MegabrainProvider);
   });
 
+  it.each([
+    ["local", "local"],
+    ["local com espaços em volta", "  local  "],
+  ])("%s: liga o provider local (sem Supabase, sem Ollama)", async (_nome, valor) => {
+    vi.stubEnv("BILHON_KNOWLEDGE_PROVIDER", valor);
+    const { LocalProvider } = await import("./local");
+    expect((await fabrica())()).toBeInstanceOf(LocalProvider);
+  });
+
   it("valor inválido: a mensagem cita os valores divulgados e não o antigo nem o recebido", async () => {
     vi.stubEnv("BILHON_KNOWLEDGE_PROVIDER", "valor-estranho");
     const get = await fabrica();
     expect(() => get()).toThrowError(/"demo" ou "supabase"/);
+    expect(() => get()).toThrowError(/"local"/);
     try {
       get();
     } catch (e) {

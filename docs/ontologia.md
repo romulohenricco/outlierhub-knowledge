@@ -67,3 +67,13 @@ regras:                            # opcional: lista livre mostrada no bloco de 
 | `cor` fora de `#RGB`/`#RRGGBB` | ignorada (cor estável) |
 | texto acima do limite | cortado: id e rótulos 120 caracteres, descrição 2000, status 40, fonte 300, chave de `dados` 80, valor 1000 |
 | quantidade acima do limite | o excedente é ignorado: 50 camadas, 2000 itens no arquivo, 50 ligações e 50 `dados` por item, 100 `status_cores`, 200 regras |
+
+## Gerada pelo `npm run populate`
+
+Com o app dentro do Megabrain, o módulo `ontologia` do [`npm run populate`](../README.md#popular-com-o-megabrain-npm-run-populate) (`scripts/populate/ontologia.mjs`) gera `data/ontologia/ontologia.yaml` com o DNA dos especialistas, e o módulo `ambiente` aponta `BILHON_ONTOLOGIA_MANIFEST` para ele. Nada é escrito sem fonte:
+
+- **Fonte**: `knowledge/external/dna/persons/<slug>/*.yaml` e `knowledge/business/…`, só lidos. `knowledge/personal` nunca entra, nem com `--include-personal`.
+- **Camadas**: `especialistas` (uma pessoa por pasta) e, na ordem L1…L10, filosofias, modelos mentais, heurísticas, frameworks, metodologias, padrões de comportamento, hierarquia de valores, DNA de voz, obsessões e paradoxos; camada sem nenhum item não aparece. A descrição de cada camada vem da tabela "DNA Schema (10 Layers)" do `.claude/CLAUDE.md` do Megabrain e a única regra (FILOSOFIA → … → METODOLOGIA), de `engine/intelligence/rag/ontology_layer.py`, ambas com arquivo e linha. Sem esses arquivos, a camada fica sem descrição e não há regra.
+- **Itens**: id `<especialista>/<id do YAML>` (sem id ou com id repetido, `<especialista>/<lista>-<posição>`, contado e avisado); `fonte` = arquivo do Megabrain + `#<id>`; `nome`, `descricao`, `status` e `dados` são campos do próprio YAML, com o nome original. Todo item de DNA liga ao seu especialista (`de`); entre itens de DNA, só quando um campo `*_id`/`*_ids` aponta para outro item que existe (ex.: `behavioral_pattern_id`). `insight_ids`, `chunk_ids` e `source_ids` ficam nos dados.
+- **Tetos**: o arquivo já sai dentro dos limites da tabela acima, então a página não descarta nada. O excedente é cortado de forma determinística e contado nos avisos do comando e em `npm run populate:status`; nome longo termina em "…" e o texto inteiro fica na descrição.
+- **Arquivo seu**: o gerado leva `gerado_por: populate:ontologia` e só é regravado quando muda. Um `data/ontologia/ontologia.{yaml,yml,json}` sem essa marca é seu e manda: o comando não grava por cima e avisa. Para editar o gerado, copie-o para outro nome e aponte `BILHON_ONTOLOGIA_MANIFEST` para a cópia numa linha sua do `.env.local`.

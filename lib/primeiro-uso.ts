@@ -190,6 +190,9 @@ export function montarCardMegabrain(det: DeteccaoMegabrain, inventario: PastaCon
   // o servidor só aceita DONE com a definição de pronto do tipo + o checklist inteiros
   const totalParaFechar = (DOD_POR_TIPO.ingest?.length ?? 0) + checklist.length;
   const dados = JSON.stringify(inventario.map((p) => ({ pasta: p.nome, itens: p.itens })));
+  // endereço do app que o agente vai chamar: `PORT` troca a porta (scripts/next-local.mjs); padrão 3300.
+  // Um PATCH na porta errada gravaria no kanban de OUTRA instância do Knowledge.
+  const urlApp = `http://127.0.0.1:${lerEnv("PORT") ?? "3300"}`;
 
   const descricao = [
     "## Objetivo",
@@ -209,8 +212,8 @@ export function montarCardMegabrain(det: DeteccaoMegabrain, inventario: PastaCon
     `3. **Mapeie para o Knowledge** (formatos exatos em \`${app}/docs/dados.md\`): livros para o catálogo, coleções e transcrições para os stores de coleções, referências para a pasta de referências. Preserve a separação por bucket (\`external\`, \`personal\`, \`business\`). O grafo (\`${app}/scripts/kg-extract.py\`, \`kg-normalize.py\` e \`graph-layout.mjs\`) é OPCIONAL e pesado: precisa de Python 3.10+, Ollama com o modelo \`qwen2.5:7b\`, \`pdftotext\` e a CLI \`sqlite3\`, pode levar dezenas de minutos e o \`kg-extract.py\` recria o sqlite do grafo (faz \`.bak\`). Só rode com a confirmação da pessoa.`,
     `4. **Escreva importadores idempotentes** em \`${app}/scripts/importar/\` (só leem do Megabrain; só gravam em \`${app}/data/\`). Rode primeiro com \`--dry-run\` e mostre o plano.`,
     `5. **Busca semântica (OPCIONAL, só se a pessoa quiser).** Exige um projeto Supabase DEDICADO (a chave de serviço ignora a RLS do projeto inteiro), trechos com embedding de 1024 dimensões gerado pelo mesmo modelo das consultas (Ollama \`bge-m3\`) e que a PESSOA cole \`${app}/supabase/schema.sql\` no SQL Editor do projeto dela (você não aplica DDL e não o rode se já existir um \`rag_chunks\` de outro formato). A pessoa grava \`BILHON_SUPABASE_URL\` e \`BILHON_SUPABASE_SERVICE_ROLE_KEY\` no \`.env.local\`; depois defina \`BILHON_KNOWLEDGE_PROVIDER=supabase\` e o escopo em \`BILHON_KNOWLEDGE_BUCKET_FILTER\`. Contrato em \`${app}/docs/provider-supabase.md\`.`,
-    "6. **Valide.** Na pasta do app, rode `npm run type-check` e `npm test`. REINICIE o app que já está rodando (o catálogo e o `.env.local` só são lidos ao iniciar: pare o processo e rode `npm run dev` de novo, em http://127.0.0.1:3300) e confira estante, grafo, busca e kanban com os dados reais. Compare esperado × processado em cada etapa.",
-    `7. **Registre e feche pelo kanban** (API local; formato em \`${app}/docs/dados.md\`, seção Kanban): marque os itens do checklist deste card com \`PATCH http://127.0.0.1:3300/api/kanban/<id deste card>\` (campo \`checklist\`) e mova para DONE com \`{ "coluna": "done", "index": 0 }\`. O servidor só aceita DONE com a definição de pronto do tipo \`ingest\` e o checklist inteiros (${totalParaFechar} itens). Registre o que entrou, o que ficou de fora e por quê, e como rodar de novo.`,
+    "6. **Valide.** Na pasta do app, rode `npm run type-check` e `npm test`. REINICIE o app que já está rodando (o catálogo e o `.env.local` só são lidos ao iniciar: pare o processo e rode `npm run dev` de novo, em " + urlApp + ") e confira estante, grafo, busca e kanban com os dados reais. Compare esperado × processado em cada etapa.",
+    `7. **Registre e feche pelo kanban** (API local; formato em \`${app}/docs/dados.md\`, seção Kanban): marque os itens do checklist deste card com \`PATCH ${urlApp}/api/kanban/<id deste card>\` (campo \`checklist\`) e mova para DONE com \`{ "coluna": "done", "index": 0 }\`. O servidor só aceita DONE com a definição de pronto do tipo \`ingest\` e o checklist inteiros (${totalParaFechar} itens). Registre o que entrou, o que ficou de fora e por quê, e como rodar de novo.`,
     "",
     "## Já detectado neste Megabrain",
     `- Raiz: \`${raiz}\` (reconhecido por: ${sinais}).`,

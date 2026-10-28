@@ -8,6 +8,7 @@
 import type { KnowledgeProvider } from "./types";
 import { MegabrainProvider } from "./megabrain";
 import { DemoProvider } from "./demo";
+import { LocalProvider } from "./local";
 
 export function getKnowledgeProvider(): KnowledgeProvider {
   const kind = process.env.BILHON_KNOWLEDGE_PROVIDER?.trim() || "demo";
@@ -19,12 +20,15 @@ export function getKnowledgeProvider(): KnowledgeProvider {
       return new MegabrainProvider();
     case "demo":
       return new DemoProvider();
+    case "local":
+      // busca FTS5 + grafo em sqlite local, tudo gerado por `npm run populate`
+      return new LocalProvider();
     default:
       // A mensagem chega ao cliente no 503 da rota de busca, então NÃO ecoa o
       // valor — nem "só se for curto e alfanumérico": um token curto passaria
       // nesse filtro. O nome da variável basta pra corrigir.
       throw new Error(
-        'BILHON_KNOWLEDGE_PROVIDER inválida — use "demo" ou "supabase" (valor atual não é ecoado por segurança).',
+        'BILHON_KNOWLEDGE_PROVIDER inválida — use "demo" ou "supabase", ou "local" para o índice local (valor atual não é ecoado por segurança).',
       );
   }
 }

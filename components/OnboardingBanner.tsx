@@ -17,6 +17,9 @@ export function OnboardingBanner({ reason }: { reason: string }) {
       <p className="mt-2 text-xs text-white/30">
         Para usar o seu Supabase: BILHON_KNOWLEDGE_PROVIDER=supabase (veja o .env.example).
       </p>
+      <p className="mt-2 text-xs text-white/30">
+        Para o índice local do Megabrain: rode npm run populate e use BILHON_KNOWLEDGE_PROVIDER=local (veja docs/provider-local.md).
+      </p>
     </main>
   );
 }

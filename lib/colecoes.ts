@@ -7,6 +7,7 @@ import { readFile } from "node:fs/promises";
 import { readdirSync, existsSync, statSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
+import { getArquivoPorOrigem } from "./catalog";
 
 const exec = promisify(execFile);
 const EXT =
@@ -178,6 +179,9 @@ export async function getColecao(slug: string): Promise<{
   } catch { /* sem mapa */ }
   const rows = await q<{ video: string; c: number }>(
     store.db, "SELECT video, COUNT(*) c FROM chunks GROUP BY video ORDER BY video");
+  // documento que também está na estante (gerado pelo populate, com o caminho de origem como
+  // `video`) entra no grafo com a identidade dela, `livro:<arquivo>`; o resto, com `livro:yt-…`
+  const arquivoPorOrigem = await getArquivoPorOrigem().catch(() => new Map<string, string>());
   const itens = rows.map((r) => {
     // store grava "<nome>.transcript" (sem .txt); o mapa foi gerado com .txt
     const yt =
@@ -195,7 +199,9 @@ export async function getColecao(slug: string): Promise<{
       chunks: r.c,
       youtubeUrl: yt?.url ?? (id ? `https://www.youtube.com/watch?v=${id}` : null),
       ehDna,
-      grafoFocus: `livro:yt-${slug}:${r.video}`,
+      grafoFocus: arquivoPorOrigem.has(r.video)
+        ? `livro:${arquivoPorOrigem.get(r.video)}`
+        : `livro:yt-${slug}:${r.video}`,
     };
   });
   return { colecao: col, itens };

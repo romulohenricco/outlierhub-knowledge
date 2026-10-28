@@ -10,6 +10,8 @@
     "lint": "eslint app components lib scripts middleware.ts",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
+    "populate": "node scripts/populate.mjs",
+    "populate:status": "node scripts/populate.mjs --status",
     "check-publication": "node scripts/verificar-publicacao.mjs"
   },
   "engines": {

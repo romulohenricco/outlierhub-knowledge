@@ -5,25 +5,25 @@
  * um tipo/prioridade novo entrasse só num lado.
  */
 import {
+  AtSign,
   Bot,
+  Briefcase,
+  Camera,
   CheckCircle2,
   Cloud,
   CircleDashed,
   File,
   FileText,
-  Github,
-  Instagram,
+  GitBranch,
   Link2,
-  Linkedin,
   ListChecks,
   Newspaper,
   Play,
   Rss,
-  Twitter,
+  SquarePlay,
   User,
   Users,
   XCircle,
-  Youtube,
   type LucideIcon,
 } from "lucide-react";
 import type {
@@ -65,15 +65,17 @@ export const LINK_TIPOS: KanbanLinkTipo[] = [
   "outro",
 ];
 
+// O lucide-react 1.x removeu os ícones de marca (GitHub, YouTube, Instagram, X, LinkedIn):
+// cada rede usa um ícone genérico e continua reconhecível pela cor e pelo rótulo.
 export const LINK_INFO: Record<KanbanLinkTipo, { rotulo: string; Icon: LucideIcon; cor: string }> = {
   clickup: { rotulo: "ClickUp", Icon: ListChecks, cor: "#7b68ee" },
-  github: { rotulo: "GitHub (commit)", Icon: Github, cor: "#f4f4e8" },
+  github: { rotulo: "GitHub (commit)", Icon: GitBranch, cor: "#f4f4e8" },
   drive: { rotulo: "cloud / drive", Icon: Cloud, cor: "#4285f4" },
-  youtube: { rotulo: "YouTube", Icon: Youtube, cor: "#ff0000" },
-  instagram: { rotulo: "Instagram", Icon: Instagram, cor: "#e1306c" },
-  x: { rotulo: "X (Twitter)", Icon: Twitter, cor: "#e8e8e8" },
+  youtube: { rotulo: "YouTube", Icon: SquarePlay, cor: "#ff0000" },
+  instagram: { rotulo: "Instagram", Icon: Camera, cor: "#e1306c" },
+  x: { rotulo: "X (Twitter)", Icon: AtSign, cor: "#e8e8e8" },
   tiktok: { rotulo: "TikTok", Icon: Link2, cor: "#25f4ee" },
-  linkedin: { rotulo: "LinkedIn", Icon: Linkedin, cor: "#0a66c2" },
+  linkedin: { rotulo: "LinkedIn", Icon: Briefcase, cor: "#0a66c2" },
   blog: { rotulo: "blog", Icon: Rss, cor: "#fb923c" },
   imprensa: { rotulo: "assessoria de imprensa", Icon: Newspaper, cor: "#d4a853" },
   output: { rotulo: "arquivo de output", Icon: File, cor: "#a1a1aa" },

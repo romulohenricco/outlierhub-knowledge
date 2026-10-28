@@ -173,6 +173,13 @@ avisa quantos); referência a ferramenta ou pai inexistente é omitida; `id` rep
 vale a primeira linha; `cor` ou `icone` inválidos voltam ao padrão; até 2000 linhas por lista e
 4 MB por arquivo. Os nomes de pessoas só existem na renderização local da página.
 
+O `npm run populate` gera este arquivo a partir do Megabrain: um pilar por squad e por categoria
+do `agents/_registry/ecosystem-registry.yaml`, com agentes, tarefas (executor = `responsavel` da
+task) e scripts `deterministic_helper(s)`. Linhas com `gerado_por: "populate:agente"` são
+reescritas a cada execução. As suas (sem a marca) são preservadas na frente, e um `id` seu igual
+a um gerado vence. A chave `_sobre` é só explicação e o leitor a ignora. A pasta de notas
+(`memoria/`) não é gerada.
+
 ### Notas
 
 Uma pasta de arquivos `.md`. As pastas de primeiro nível viram os *hubs* do núcleo. As ligações
@@ -370,12 +377,16 @@ workflows, clones, shadows, engines e repos): uma raiz, um hub por tipo e as ent
 - **Sem inventário configurado** a camada fica vazia e a tela diz "inventário não configurado". Falha nessa
   camada não derruba o grafo de conhecimento.
 - **Com a topologia ligada**, a entidade cujo `path` é igual ao de um nó da topologia ganha a
-  aresta `mora em` até a pasta dela.
+  aresta `mora em` até a pasta dela (a comparação ignora a diferença entre `\` e `/`, então vale
+  também no Windows).
 - **Filtro por data** (últimos 7/30/90 dias, último ano ou intervalo): a data de um nó é
   a última modificação (`mtime`) do `path` dele. Para entidade do ecossistema vale o sinal mais
   recente entre o `mtime`, o último dia de uso (`uso.ultimo`) e o último push (`meta.ultimo_push`).
-  Livro e post de referência usam o `mtime` do arquivo ou pasta; o conceito herda a obra mais
-  antiga que o sustenta. O `path` só é lido se estiver **dentro de `BILHON_ROOT`** (livros e
+  Livro e post de referência usam o `mtime` do arquivo ou pasta; uma fonte do grafo fora da estante
+  (`yt-<coleção>:<caminho>`, como a config e o código de um Megabrain populado) usa o `mtime` de
+  `<raiz>/<caminho>`, onde `<raiz>` é o repositório que gerou o grafo (campo `raiz` de
+  `data/kg/populate-grafo.json`), aceita só se o `sqliteSha256` desse manifesto conferir com o sqlite
+  em uso e se a raiz ficar dentro de `BILHON_ROOT`; sem essa comprovação a fonte fica sem data; o conceito herda a obra mais antiga que o sustenta. O `path` só é lido se estiver **dentro de `BILHON_ROOT`** (livros e
   referências: dentro das respectivas pastas); fora dela, ou inexistente, o nó fica sem data.
   Nós sem data são ocultados e contados ("N ocultos"), com um botão para mantê-los. Raiz e hubs
   são estruturais e passam sempre, desde que sustentem algum nó que passou.
