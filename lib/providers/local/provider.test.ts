@@ -24,6 +24,17 @@ function temFts5(): boolean {
 }
 const TEM_FTS5 = temFts5();
 
+function temSqlite3(): boolean {
+  try {
+    execFileSync("sqlite3", ["--version"], { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+// a CLI pode existir sem FTS5; o que muda o motivo do status() é ela existir ou não
+const TEM_SQLITE3 = temSqlite3();
+
 let tmp: string;
 let indice: string;
 
@@ -172,7 +183,8 @@ describe("LocalProvider", () => {
     const { LocalProvider } = await import("./index");
     const s = await new LocalProvider().status();
     expect(s.configured).toBe(false);
-    expect(s.reason).toMatch(/npm run populate/);
+    // com a CLI o arquivo é ilegível e a saída é repopular; sem ela (ex.: runner Windows do CI) o motivo é instalá-la
+    expect(s.reason).toMatch(TEM_SQLITE3 ? /npm run populate/ : /sqlite3/);
   });
 
   it.skipIf(!TEM_FTS5)("status() com índice e sem grafo: configured=true, avisa modo somente-busca", async () => {
