@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useDeferredValue, useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, Copy, Check } from "lucide-react";
 import type { Colecao, ItemColecao } from "@/lib/colecoes";
 import type { EcoEntity } from "@/lib/types";
+import { CampoBusca } from "@/components/CampoBusca";
 
 const COR_TIPO: Record<string, string> = {
   pessoa: "#35a894",
@@ -18,6 +19,65 @@ const ICONE: Record<string, string> = {
   clickup: "☑",
   cursos: "📄",
 };
+
+/** Linha da lista: memo para que filtrar só monte/desmonte as linhas que mudam. */
+const ItemLinha = memo(function ItemLinha({
+  it,
+  cor,
+  tipo,
+  slug,
+}: {
+  it: ItemColecao;
+  cor: string;
+  tipo: string;
+  slug: string;
+}) {
+  return (
+    <li
+      // fora da tela não paga layout/pintura (lista longa)
+      className="flex items-center gap-3 rounded-[var(--bl-radius-md)] border border-[var(--bl-border)] bg-[var(--bl-bg-card-solid)] px-4 py-2.5 [contain-intrinsic-size:auto_46px] [content-visibility:auto] hover:border-[var(--bl-border-hover)]"
+    >
+      <span className="shrink-0 text-sm" style={{ color: cor }}>
+        {it.ehDna ? "🧬" : ICONE[tipo]}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-sm text-white/80">
+        {it.titulo}
+      </span>
+      <span className="shrink-0 font-mono text-[10px] text-white/25">
+        {it.chunks} ch
+      </span>
+      <Link
+        href={`/colecao/${encodeURIComponent(slug)}/${encodeURIComponent(it.doc)}`}
+        prefetch={false}
+        className="shrink-0 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border-hover)] bg-[var(--bl-bg-card-solid)] px-2 py-1 text-[11px] text-white/80 hover:bg-[var(--bl-bg-card-hover)]"
+        title="ler o transcript completo (local — independe do YouTube)"
+      >
+        📖 ler
+      </Link>
+      {it.youtubeUrl && (
+        <a
+          href={it.youtubeUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="shrink-0 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border)] px-2 py-1 text-[11px] text-white/60 hover:bg-[var(--bl-bg-card-hover)]"
+        >
+          ▶ assistir
+        </a>
+      )}
+      <Link
+        href={`/grafo?focus=${encodeURIComponent(it.grafoFocus)}`}
+        prefetch={false}
+        className="shrink-0 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border)] px-2 py-1 text-[11px] text-white/60 hover:bg-[var(--bl-bg-card-hover)]"
+        title="ver este item no grafo"
+      >
+        ⊕ grafo
+      </Link>
+    </li>
+  );
+});
+
+/** Quantas linhas montar de cada vez: montar 500+ de uma vez travava a tela ao limpar o filtro. */
+const LOTE = 100;
 
 export function ColecaoView({
   colecao,
@@ -38,10 +98,22 @@ export function ColecaoView({
     setTimeout(() => setCopiado((c) => (c === chave ? null : c)), 1500);
   }
 
+  // a lista usa o termo adiado: render pesado nunca bloqueia teclas nem o esvaziar do campo
+  const qAdiado = useDeferredValue(q);
   const filtrados = useMemo(() => {
-    const qn = q.trim().toLowerCase();
+    const qn = qAdiado.trim().toLowerCase();
     return qn ? itens.filter((it) => it.titulo.toLowerCase().includes(qn)) : itens;
-  }, [itens, q]);
+  }, [itens, qAdiado]);
+
+  // janela de linhas visíveis; volta ao primeiro lote quando o termo muda (ajuste durante o render)
+  const [limite, setLimite] = useState(LOTE);
+  const [termoVisto, setTermoVisto] = useState(qAdiado);
+  if (qAdiado !== termoVisto) {
+    setTermoVisto(qAdiado);
+    setLimite(LOTE);
+  }
+  const visiveis = filtrados.length > limite ? filtrados.slice(0, limite) : filtrados;
+  const restantes = filtrados.length - visiveis.length;
 
   return (
     <div className="flex gap-8">
@@ -105,9 +177,10 @@ export function ColecaoView({
         {/* filtro de itens */}
         <div className="relative mb-4">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-white/30" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+          <CampoBusca
+            valor={q}
+            aoMudar={setQ}
+            atraso={150}
             placeholder="filtrar itens…"
             className="w-full rounded-[var(--bl-radius-sm)] bg-[var(--bl-bg-input)] py-1.5 pl-8 pr-2 text-sm outline-none ring-1 ring-[var(--bl-border)] placeholder:text-white/25 focus:ring-[var(--bl-border-accent)]"
           />
@@ -131,49 +204,31 @@ export function ColecaoView({
       <section className="min-w-0 flex-1">
         <p className="mb-4 text-xs text-white/40">
           {filtrados.length}/{itens.length} itens
+          {restantes > 0 && ` · mostrando ${visiveis.length}`}
         </p>
         <ul className="space-y-1.5">
-          {filtrados.map((it) => (
-            <li
-              key={it.doc}
-              className="flex items-center gap-3 rounded-[var(--bl-radius-md)] border border-[var(--bl-border)] bg-[var(--bl-bg-card-solid)] px-4 py-2.5 hover:border-[var(--bl-border-hover)]"
-            >
-              <span className="shrink-0 text-sm" style={{ color: cor }}>
-                {it.ehDna ? "🧬" : ICONE[colecao.tipo]}
-              </span>
-              <span className="min-w-0 flex-1 truncate text-sm text-white/80">
-                {it.titulo}
-              </span>
-              <span className="shrink-0 font-mono text-[10px] text-white/25">
-                {it.chunks} ch
-              </span>
-              <Link
-                href={`/colecao/${encodeURIComponent(colecao.slug)}/${encodeURIComponent(it.doc)}`}
-                className="shrink-0 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border-hover)] bg-[var(--bl-bg-card-solid)] px-2 py-1 text-[11px] text-white/80 hover:bg-[var(--bl-bg-card-hover)]"
-                title="ler o transcript completo (local — independe do YouTube)"
-              >
-                📖 ler
-              </Link>
-              {it.youtubeUrl && (
-                <a
-                  href={it.youtubeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="shrink-0 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border)] px-2 py-1 text-[11px] text-white/60 hover:bg-[var(--bl-bg-card-hover)]"
-                >
-                  ▶ assistir
-                </a>
-              )}
-              <Link
-                href={`/grafo?focus=${encodeURIComponent(it.grafoFocus)}`}
-                className="shrink-0 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border)] px-2 py-1 text-[11px] text-white/60 hover:bg-[var(--bl-bg-card-hover)]"
-                title="ver este item no grafo"
-              >
-                ⊕ grafo
-              </Link>
-            </li>
+          {visiveis.map((it) => (
+            <ItemLinha key={it.doc} it={it} cor={cor} tipo={colecao.tipo} slug={colecao.slug} />
           ))}
         </ul>
+        {restantes > 0 && (
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setLimite((l) => l + LOTE)}
+              className="rounded-[var(--bl-radius-sm)] border border-[var(--bl-border-hover)] bg-[var(--bl-bg-card-solid)] px-3 py-1.5 text-xs text-white/80 hover:bg-[var(--bl-bg-card-hover)]"
+            >
+              mostrar mais {Math.min(LOTE, restantes)}
+            </button>
+            <button
+              type="button"
+              onClick={() => setLimite(filtrados.length)}
+              className="rounded-[var(--bl-radius-sm)] border border-[var(--bl-border)] px-3 py-1.5 text-xs text-white/60 hover:bg-[var(--bl-bg-card-hover)]"
+            >
+              mostrar todos ({restantes} restantes)
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );
