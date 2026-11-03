@@ -132,10 +132,12 @@ export default function OntologiaGrafo({
     return m;
   }, []);
 
+  // último layout, lido por enquadrar/localizar sem pôr `layout` nas deps deles. Atualizado
+  // em efeito, que precisa ficar declarado ANTES dos efeitos que chamam enquadrar (ordem de declaração)
   const layoutRef = useRef(layout);
-  const tamRef = useRef(tam);
-  layoutRef.current = layout;
-  tamRef.current = tam;
+  useEffect(() => {
+    layoutRef.current = layout;
+  }, [layout]);
 
   /** Enquadra a caixa dos nós (de uma camada, ou todos). */
   const enquadrar = useCallback((camada?: string, inicial = false) => {
@@ -148,10 +150,11 @@ export default function OntologiaGrafo({
     const L = layoutRef.current;
     const area = areaRef.current;
     // tamanho lido do DOM, não do estado: logo após entrar/sair da tela cheia o
-    // ResizeObserver ainda não rodou e o tamRef seria o de antes
-    const w = area ? area.clientWidth : tamRef.current.w;
-    const h = area ? area.clientHeight : tamRef.current.h;
-    if (!L || w === 0) return;
+    // ResizeObserver ainda não rodou e `tam` estaria defasado
+    if (!L || !area) return;
+    const w = area.clientWidth;
+    const h = area.clientHeight;
+    if (w === 0) return;
     let x0 = Infinity,
       y0 = Infinity,
       x1 = -Infinity,
@@ -346,10 +349,19 @@ export default function OntologiaGrafo({
   }, [layout, visiveis, links]);
 
   const noSel = sel ? porId.get(sel) ?? null : null;
-  // sem nó selecionado não há Raio-X
-  useEffect(() => {
-    if (!noSel) setRaioX(false);
-  }, [noSel]);
+  // sem nó selecionado não há Raio-X (ajuste durante o render, com guarda: converge em 1 re-render)
+  if (!noSel && raioX) setRaioX(false);
+
+  /* ── modo força ─────────────────────────────────────────────────── */
+  const dadosForca = useMemo(() => {
+    if (modo !== "forca") return { nodes: [] as NoForca[], links: [] as LigForca[] };
+    const ns: NoForca[] = visiveis.map((no) => ({ id: no.id, no }));
+    const ls: LigForca[] = [];
+    for (const n of visiveis) if (n.parent && idsVis.has(n.parent)) ls.push({ source: n.parent, target: n.id, rel: false });
+    for (const l of links)
+      if (idsVis.has(l.source) && idsVis.has(l.target)) ls.push({ source: l.source, target: l.target, rel: true, verbo: l.verbo });
+    return { nodes: ns, links: ls };
+  }, [modo, visiveis, idsVis, links]);
 
   /** Seleciona o nó e põe o centro dele no centro da área livre (sem menus por cima). */
   const localizar = useCallback(
@@ -358,7 +370,7 @@ export default function OntologiaGrafo({
       setRaioX(false);
       interagiuRef.current = true;
       if (modo === "forca") {
-        const alvo = fgRef.current ? dadosForcaRef.current.nodes.find((n) => n.id === id) : undefined;
+        const alvo = fgRef.current ? dadosForca.nodes.find((n) => n.id === id) : undefined;
         if (alvo && alvo.x !== undefined && alvo.y !== undefined) fgRef.current?.centerAt(alvo.x, alvo.y, 500);
         return;
       }
@@ -373,22 +385,8 @@ export default function OntologiaGrafo({
         return { k, x: esq + W / 2 - (p.x + CARD_W / 2) * k, y: topo + H / 2 - (p.y + CARD_H / 2) * k };
       });
     },
-    [modo, mede],
+    [modo, mede, dadosForca],
   );
-
-  /* ── modo força ─────────────────────────────────────────────────── */
-  const dadosForca = useMemo(() => {
-    if (modo !== "forca") return { nodes: [] as NoForca[], links: [] as LigForca[] };
-    const ns: NoForca[] = visiveis.map((no) => ({ id: no.id, no }));
-    const ls: LigForca[] = [];
-    for (const n of visiveis) if (n.parent && idsVis.has(n.parent)) ls.push({ source: n.parent, target: n.id, rel: false });
-    for (const l of links)
-      if (idsVis.has(l.source) && idsVis.has(l.target)) ls.push({ source: l.source, target: l.target, rel: true, verbo: l.verbo });
-    return { nodes: ns, links: ls };
-  }, [modo, visiveis, idsVis, links]);
-
-  const dadosForcaRef = useRef(dadosForca);
-  dadosForcaRef.current = dadosForca;
 
   const esmaece = (id: string) => (foco ? !foco.has(id) : false);
 
