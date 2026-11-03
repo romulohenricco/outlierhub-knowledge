@@ -16,6 +16,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { CampoBusca } from "./CampoBusca";
 import { Secao, ListaExpansivel, linhaCls, COR_CAT } from "./Filtros";
 import { usePagePanel } from "./PagePanel";
 import { SocialVazio } from "./SocialVazio";
@@ -107,11 +108,11 @@ export function YoutubePlaylists({
       <>
         <div className="relative mb-4">
           <Search className="absolute left-2 top-2 h-4 w-4 text-white/30" />
-          <input
-            value={f.q}
-            onChange={(e) => {
-              set({ q: e.target.value });
-              setAba("videos");
+          <CampoBusca
+            valor={f.q}
+            aoMudar={(q) => {
+              set({ q });
+              if (q) setAba("videos");
             }}
             placeholder="título, canal, palavra-chave…"
             className="w-full rounded-[var(--bl-radius-sm)] bg-[var(--bl-bg-input)] py-1.5 pl-8 pr-2 text-sm outline-none ring-1 ring-[var(--bl-border)] placeholder:text-white/25 focus:ring-[var(--bl-border-accent)]"
