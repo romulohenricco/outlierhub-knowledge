@@ -4,7 +4,7 @@
  * Theme picker — port React do theme-picker vanilla do design system
  * (mesmos temas, mesma chave 'bl-theme', mesmas classes CSS).
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Palette, Check } from "lucide-react";
 
 const TEMAS = [
@@ -25,13 +25,34 @@ const TEMAS = [
   { id: "paper", label: "Paper", group: "light", swatch: "#8B6914" },
 ] as const;
 
+// Tema aplicado lido como store externo (sem setState em efeito). O snapshot é o
+// atributo data-theme do <html>: o themeInit o define a partir do localStorage
+// antes da hidratação e só aplicar() o altera. Assim o marcador reflete o tema
+// realmente aplicado nesta aba (outras abas não são sincronizadas, como antes) e
+// a leitura nunca lança. Um evento próprio notifica a troca (setItem não dispara
+// "storage" na mesma aba).
+const EVENTO_TEMA = "bl-theme-change";
+
+function assinarTema(cb: () => void) {
+  window.addEventListener(EVENTO_TEMA, cb);
+  return () => window.removeEventListener(EVENTO_TEMA, cb);
+}
+
+function lerTema() {
+  return document.documentElement.getAttribute("data-theme") || "bos";
+}
+
+// Servidor e hidratação começam em "bos"; o script themeInit já aplicou o real no <html>.
+function lerTemaServidor() {
+  return "bos";
+}
+
 export function ThemePicker() {
   const [aberto, setAberto] = useState(false);
-  const [tema, setTema] = useState("bos");
+  const tema = useSyncExternalStore(assinarTema, lerTema, lerTemaServidor);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setTema(localStorage.getItem("bl-theme") ?? "bos");
     const fecha = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setAberto(false);
     };
@@ -45,9 +66,12 @@ export function ThemePicker() {
   }, []);
 
   function aplicar(id: string) {
-    setTema(id);
     document.documentElement.setAttribute("data-theme", id);
-    localStorage.setItem("bl-theme", id);
+    try {
+      localStorage.setItem("bl-theme", id);
+    } finally {
+      window.dispatchEvent(new Event(EVENTO_TEMA));
+    }
     setAberto(false);
   }
 

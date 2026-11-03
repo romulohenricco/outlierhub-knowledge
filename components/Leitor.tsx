@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Livro } from "@/lib/types";
 
 /**
@@ -25,6 +25,9 @@ function savePos(id: string, pos: number) {
   localStorage.setItem(KEY, JSON.stringify(all));
 }
 
+// Gate de hidratação: false no servidor e na hidratação, true depois (sem assinatura real).
+const assinarNada = () => () => {};
+
 export function LeitorPdf({
   livro,
   paginaInicial,
@@ -32,12 +35,21 @@ export function LeitorPdf({
   livro: Livro;
   paginaInicial?: number;
 }) {
-  const [pagina, setPagina] = useState<number | null>(null);
-
-  useEffect(() => {
-    // deep-link (?page= vindo do grafo/evidência) vence a posição salva
-    setPagina(paginaInicial ?? loadPos()[livro.id] ?? 1);
-  }, [livro.id, paginaInicial]);
+  const hidratado = useSyncExternalStore(
+    assinarNada,
+    () => true,
+    () => false,
+  );
+  const chave = `${livro.id}|${paginaInicial ?? ""}`;
+  const [atual, setAtual] = useState<{ chave: string; pagina: number } | null>(null);
+  if (hidratado && atual?.chave !== chave) {
+    // 1ª vez no cliente, ou livro/deep-link mudou: resolve a página UMA vez, como o efeito
+    // antigo. O deep-link (?page= vindo do grafo/evidência) vence a posição salva.
+    setAtual({ chave, pagina: paginaInicial ?? loadPos()[livro.id] ?? 1 });
+  }
+  // null no servidor e na hidratação (o localStorage só é lido no cliente)
+  const pagina = atual?.chave === chave ? atual.pagina : null;
+  const irPara = (n: number) => setAtual({ chave, pagina: Math.max(1, n) });
 
   useEffect(() => {
     if (pagina !== null) savePos(livro.id, pagina);
@@ -49,7 +61,7 @@ export function LeitorPdf({
     <div className="flex h-[calc(100vh-140px)] flex-col">
       <div className="mb-2 flex items-center gap-2 text-sm">
         <button
-          onClick={() => setPagina((p) => Math.max(1, (p ?? 1) - 1))}
+          onClick={() => irPara(pagina - 1)}
           className="rounded-[var(--bl-radius-xs)] border border-[var(--bl-border)] bg-[var(--bl-bg-input)] px-2.5 py-1 hover:bg-[var(--bl-bg-card-hover)]"
         >
           ← pág
@@ -58,11 +70,11 @@ export function LeitorPdf({
           type="number"
           min={1}
           value={pagina}
-          onChange={(e) => setPagina(Math.max(1, Number(e.target.value) || 1))}
+          onChange={(e) => irPara(Number(e.target.value) || 1)}
           className="w-16 rounded-[var(--bl-radius-xs)] border border-[var(--bl-border)] bg-[var(--bl-bg-input)] px-2 py-1 text-center outline-none focus:border-[var(--bl-border-accent)]"
         />
         <button
-          onClick={() => setPagina((p) => (p ?? 1) + 1)}
+          onClick={() => irPara(pagina + 1)}
           className="rounded-[var(--bl-radius-xs)] border border-[var(--bl-border)] bg-[var(--bl-bg-input)] px-2.5 py-1 hover:bg-[var(--bl-bg-card-hover)]"
         >
           pág →

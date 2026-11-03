@@ -22,6 +22,9 @@ function Rotulo({ icone, children }: { icone: React.ReactNode; children: React.R
 export function PersonasViewer({ personas }: { personas: Persona[] }) {
   const [i, setI] = useState(0);
   const total = personas.length;
+  // filtro mudou o conjunto: volta ao início se o índice saiu do range
+  // (ajuste durante o render; a guarda i > 0 evita loop quando total é 0)
+  if (i > 0 && i >= total) setI(0);
   const ir = useCallback((d: number) => setI((v) => (v + d + total) % total), [total]);
 
   useEffect(() => {
@@ -35,11 +38,6 @@ export function PersonasViewer({ personas }: { personas: Persona[] }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [ir]);
-
-  // filtro mudou o conjunto: volta ao início se o índice saiu do range
-  useEffect(() => {
-    setI((v) => (v >= total ? 0 : v));
-  }, [total]);
 
   const p = personas[i];
   if (!p) return <p className="text-sm text-white/40">Nenhuma persona encontrada com esse filtro.</p>;

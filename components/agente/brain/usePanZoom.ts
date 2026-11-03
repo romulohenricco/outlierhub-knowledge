@@ -62,7 +62,7 @@ export function usePanZoom(onK?: (k: number) => void) {
     [pintar],
   );
 
-  const passo = useCallback(() => {
+  const passo = useCallback(function passo() {
     quadro.current = 0;
     const m = medir();
     const a = atual.current;

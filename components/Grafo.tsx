@@ -6,7 +6,7 @@
  * Paleta validada (dataviz): conceito #5b8cff · livro #c07f28 ·
  * confirmed #2aa968 · claimed #5b6575 (contexto recessivo) · disputed #d64545 + TRACEJADA.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { cortaTexto } from "@/lib/texto";
@@ -200,16 +200,15 @@ const semVolume = (p: string) => p.replace(/^[A-Za-z]:[\\/]/, "");
  * separadas de propósito — somar as duas dá um número assustador e inútil
  * (tipicamente poucas ativas contra muitas de dado).
  */
-function PainelTopologia({ n, onEgo }: { n: Nodo; onEgo: () => void }) {
+function PainelTopologia(props: { n: Nodo; onEgo: () => void }) {
+  // troca de nó invalida o relatório anterior (key remonta o corpo) — senão o
+  // painel mostraria o impacto do nó antigo sob o título do novo
+  return <PainelTopologiaCorpo key={props.n.id} {...props} />;
+}
+
+function PainelTopologiaCorpo({ n, onEgo }: { n: Nodo; onEgo: () => void }) {
   const [imp, setImp] = useState<Impacto | null>(null);
   const [estado, setEstado] = useState<"parado" | "carregando" | "vazio" | "erro">("parado");
-
-  // troca de nó invalida o relatório anterior — senão o painel mostraria o
-  // impacto do nó antigo sob o título do novo
-  useEffect(() => {
-    setImp(null);
-    setEstado("parado");
-  }, [n.id]);
 
   const consultar = async () => {
     if (!n.path) return;
@@ -438,13 +437,69 @@ function ChipsFiltro({
   );
 }
 
+/* ── preferências do painel flutuante (largura + minimizado) ──────────
+ * Fonte de verdade em memória enquanto o Grafo está montado, lida do localStorage
+ * a cada montagem (o cache é descartado quando o último ouvinte sai).
+ * Gravar atualiza a memória, avisa os ouvintes e persiste (melhor esforço). */
+const PAINEL_CHAVE = "knowledge-grafo-painel";
+type PainelPrefs = { w: number; aberto: boolean };
+const PAINEL_PADRAO: PainelPrefs = { w: 384, aberto: true };
+const limitaPainelW = (w: number) => Math.min(Math.max(w, 280), 720);
+let painelPrefs: PainelPrefs | null = null;
+const painelOuvintes = new Set<() => void>();
+
+function lerPainel(): PainelPrefs {
+  if (painelPrefs) return painelPrefs;
+  let prefs = PAINEL_PADRAO;
+  try {
+    const s = JSON.parse(localStorage.getItem(PAINEL_CHAVE) ?? "{}");
+    prefs = {
+      w: s.w ? limitaPainelW(s.w) : PAINEL_PADRAO.w,
+      aberto: typeof s.aberto === "boolean" ? s.aberto : PAINEL_PADRAO.aberto,
+    };
+  } catch { /* primeiro uso */ }
+  painelPrefs = prefs;
+  return prefs;
+}
+const lerPainelServidor = () => PAINEL_PADRAO; // SSR e 1º render da hidratação
+
+function subscribePainel(ouvinte: () => void) {
+  painelOuvintes.add(ouvinte);
+  return () => {
+    painelOuvintes.delete(ouvinte);
+    // sem montagem ativa: a próxima relê o localStorage (outra aba pode ter mudado o painel)
+    if (painelOuvintes.size === 0) painelPrefs = null;
+  };
+}
+
+function persistePainel() {
+  try {
+    localStorage.setItem(PAINEL_CHAVE, JSON.stringify(lerPainel()));
+  } catch { /* storage cheio/bloqueado: a UI segue só em memória */ }
+}
+
+// persistir=false no arrasto (um setItem por mousemove pesaria): quem arrasta
+// chama persistePainel() ao soltar
+function gravarPainel(parcial: Partial<PainelPrefs>, persistir = true) {
+  const atual = lerPainel();
+  const prox = { ...atual, ...parcial };
+  if (prox.w !== atual.w || prox.aberto !== atual.aberto) {
+    painelPrefs = prox;
+    painelOuvintes.forEach((f) => f());
+  }
+  if (persistir) persistePainel();
+}
+
 /* ── componente ────────────────────────────────────────────────────── */
 export function Grafo() {
   const fgRef = useRef<ForceGraphMethods<Nodo, Aresta> | undefined>(undefined);
   const boxRef = useRef<HTMLDivElement>(null);
   const sp = useSearchParams();
   const mostrarToast = useToast();
-  const focoAmpliado = useRef(false); // o deep-link só amplia os filtros uma vez
+  const [focoAmpliado, setFocoAmpliado] = useState(false); // o deep-link só amplia os filtros uma vez
+  // deep-link resolvido durante o render; o efeito só cuida do que é externo (câmera, toast, fetch)
+  const [pedidoFoco, setPedidoFoco] = useState<{ foco: string; no: Nodo | null } | null>(null);
+  const [cargaTratada, setCargaTratada] = useState({ carregando: true, nNos: 0 });
 
   const [dados, setDados] = useState<{ nodes: Nodo[]; links: Aresta[] }>({ nodes: [], links: [] });
   const [stats, setStats] = useState<Record<string, number> | null>(null);
@@ -495,8 +550,7 @@ export function Grafo() {
   const [hoverNode, setHoverNode] = useState<Nodo | null>(null);
 
   /* ── carga de dados ── */
-  const carregar = useCallback(async () => {
-    setCarregando(true);
+  const carregar = useCallback(() => {
     const qs = new URLSearchParams({ status: status.join(",") });
     if (!comConhecimento) qs.set("conhecimento", "0");
     if (comEco) {
@@ -519,34 +573,43 @@ export function Grafo() {
       if (topoArestas.length) qs.set("topoTipos", topoArestas.join(","));
       if (topoMortas) qs.set("topoMortas", "1");
     }
-    const r = await fetch(`/api/graph?${qs}`);
-    const d = await r.json();
-    if (d.erro) {
-      setStats(null);
-      setTopoMeta(null);
-      setTopoErro(null);
-      setEcoMeta(null);
-      setEcoErro(null);
-      setDados({ nodes: [], links: [] });
-      setCarregando(false);
-      return;
-    }
-    setStats(d.stats);
-    setTopoMeta((d.topo as TopoMeta) ?? null);
-    setTopoErro((d.topoErro as string) ?? null);
-    setEcoMeta((d.eco as EcoMeta) ?? null);
-    setEcoErro((d.ecoErro as string) ?? null);
-    const porId = new Map((d.nodes as Nodo[]).map((n) => [n.id, n]));
-    const links: Aresta[] = (d.edges as Aresta[])
-      .filter((e) => porId.has(e.src) && porId.has(e.dst))
-      .map((e) => ({ ...e, source: e.src, target: e.dst }));
-    setDados({ nodes: d.nodes, links });
-    setCarregando(false);
+    return fetch(`/api/graph?${qs}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.erro) {
+          setStats(null);
+          setTopoMeta(null);
+          setTopoErro(null);
+          setEcoMeta(null);
+          setEcoErro(null);
+          setDados({ nodes: [], links: [] });
+          setCarregando(false);
+          return;
+        }
+        setStats(d.stats);
+        setTopoMeta((d.topo as TopoMeta) ?? null);
+        setTopoErro((d.topoErro as string) ?? null);
+        setEcoMeta((d.eco as EcoMeta) ?? null);
+        setEcoErro((d.ecoErro as string) ?? null);
+        const porId = new Map((d.nodes as Nodo[]).map((n) => [n.id, n]));
+        const links: Aresta[] = (d.edges as Aresta[])
+          .filter((e) => porId.has(e.src) && porId.has(e.dst))
+          .map((e) => ({ ...e, source: e.src, target: e.dst }));
+        setDados({ nodes: d.nodes, links });
+        setCarregando(false);
+      });
   }, [
     status, tema, comConhecimento, comLivros, comRefs, comVideos,
     comTopologia, topoPlanos, topoTiposNo, topoArestas, topoMortas, sp,
     comEco, ecoKinds, ecoProc,
   ]);
+
+  // nova consulta (filtro mudou) = overlay já neste render, sem setState no efeito
+  const [carregarVisto, setCarregarVisto] = useState(() => carregar);
+  if (carregarVisto !== carregar) {
+    setCarregarVisto(() => carregar);
+    setCarregando(true);
+  }
 
   useEffect(() => void carregar(), [carregar]);
 
@@ -637,15 +700,22 @@ export function Grafo() {
   }, [hoverNode, sel, visivel]);
 
   /* ── seleção de nó ── */
+  // ficha do livro por cadeia de promise (não async/await) para poder ser chamada de efeito
+  const carregarMetaLivro = useCallback((n: Nodo | null): Promise<void> => {
+    if (n?.tipo === "livro" && n.livroId) {
+      return fetch(`/api/books/${n.livroId}`).then(async (r) => {
+        if (r.ok) setSelMeta(await r.json());
+      });
+    }
+    return Promise.resolve();
+  }, []);
+
   const selecionaNo = useCallback(async (n: Nodo | null) => {
     setSel(n);
     setSelEdge(null);
     setSelMeta(null);
-    if (n?.tipo === "livro" && n.livroId) {
-      const r = await fetch(`/api/books/${n.livroId}`);
-      if (r.ok) setSelMeta(await r.json());
-    }
-  }, []);
+    await carregarMetaLivro(n);
+  }, [carregarMetaLivro]);
 
   const selecionaAresta = useCallback(async (l: Aresta) => {
     setSelEdge(l);
@@ -657,28 +727,45 @@ export function Grafo() {
   }, []);
 
   /* ── deep-link ?focus= ── */
-  useEffect(() => {
+  // Reage à mesma transição de antes (carregando, nº de nós): a seleção e a
+  // ampliação dos filtros são estado, resolvidas no render; o efeito abaixo faz só o externo.
+  const nNos = dados.nodes.length;
+  if (cargaTratada.carregando !== carregando || cargaTratada.nNos !== nNos) {
+    setCargaTratada({ carregando, nNos });
     const foco = sp.get("focus");
-    if (!foco || carregando || dados.nodes.length === 0) return;
-    const n = dados.nodes.find((x) => x.id === foco || x.label === foco);
-    if (n) {
-      void selecionaNo(n);
-      setTimeout(() => fgRef.current?.centerAt(n.x ?? 0, n.y ?? 0, 800), 600);
-      setTimeout(() => fgRef.current?.zoom(3, 800), 700);
+    if (foco && !carregando && nNos > 0) {
+      const n = dados.nodes.find((x) => x.id === foco || x.label === foco);
+      if (n) {
+        setSel(n);
+        setSelEdge(null);
+        setSelMeta(null);
+        setPedidoFoco({ foco, no: n });
+      } else {
+        // fora dos filtros padrão (disputada, outro tema, livros ocultos): amplia e recarrega uma vez
+        const mais = focoAmpliado ? null : ampliarParaFoco({ status, tema, comLivros });
+        setFocoAmpliado(true);
+        if (mais) {
+          setStatus(mais.status);
+          setTema(mais.tema);
+          setComLivros(mais.comLivros);
+        } else {
+          setPedidoFoco({ foco, no: null });
+        }
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (!pedidoFoco) return;
+    const { foco, no } = pedidoFoco;
+    if (!no) {
+      mostrarToast(`conceito "${foco}" não encontrado no grafo`, "aviso");
       return;
     }
-    // fora dos filtros padrão (disputada, outro tema, livros ocultos): amplia e recarrega uma vez
-    const mais = focoAmpliado.current ? null : ampliarParaFoco({ status, tema, comLivros });
-    focoAmpliado.current = true;
-    if (mais) {
-      setStatus(mais.status);
-      setTema(mais.tema);
-      setComLivros(mais.comLivros);
-    } else {
-      mostrarToast(`conceito "${foco}" não encontrado no grafo`, "aviso");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [carregando, dados.nodes.length]);
+    void carregarMetaLivro(no);
+    setTimeout(() => fgRef.current?.centerAt(no.x ?? 0, no.y ?? 0, 800), 600);
+    setTimeout(() => fgRef.current?.zoom(3, 800), 700);
+  }, [pedidoFoco, mostrarToast, carregarMetaLivro]);
 
   /* ── busca de nó ── */
   const resultadosBusca = useMemo(() => {
@@ -775,26 +862,20 @@ export function Grafo() {
     setStatus((f) => (f.includes(s) ? f.filter((x) => x !== s) : [...f, s]));
 
   /* ── painel flutuante: largura arrastável + minimizar (persistidos) ── */
-  const [painelW, setPainelW] = useState(384);
-  const [painelAberto, setPainelAberto] = useState(true);
-  useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem("knowledge-grafo-painel") ?? "{}");
-      if (s.w) setPainelW(Math.min(Math.max(s.w, 280), 720));
-      if (typeof s.aberto === "boolean") setPainelAberto(s.aberto);
-    } catch { /* primeiro uso */ }
-  }, []);
-  useEffect(() => {
-    localStorage.setItem("knowledge-grafo-painel", JSON.stringify({ w: painelW, aberto: painelAberto }));
-  }, [painelW, painelAberto]);
+  const { w: painelW, aberto: painelAberto } = useSyncExternalStore(
+    subscribePainel,
+    lerPainel,
+    lerPainelServidor,
+  );
 
   const arrastaPainel = useCallback((ev: React.MouseEvent) => {
     ev.preventDefault();
     const move = (e: MouseEvent) =>
-      setPainelW(Math.min(Math.max(window.innerWidth - e.clientX - 12, 280), 720));
+      gravarPainel({ w: limitaPainelW(window.innerWidth - e.clientX - 12) }, false);
     const up = () => {
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseup", up);
+      persistePainel();
       document.body.style.cursor = "";
     };
     document.body.style.cursor = "col-resize";
@@ -1255,7 +1336,7 @@ export function Grafo() {
                 painel
               </span>
               <button
-                onClick={() => setPainelAberto(false)}
+                onClick={() => gravarPainel({ aberto: false })}
                 title="minimizar painel (canvas inteiro)"
                 className="rounded border border-[var(--bl-border)] px-2.5 py-1 text-xs text-[var(--bl-text-dim)] hover:bg-[var(--bl-bg-card-hover)] hover:text-[var(--bl-text-primary)]"
               >
@@ -1302,7 +1383,7 @@ export function Grafo() {
         </aside>
       ) : (
         <button
-          onClick={() => setPainelAberto(true)}
+          onClick={() => gravarPainel({ aberto: true })}
           title="mostrar painel"
           className="absolute right-2 top-14 z-20 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border-hover)] bg-[var(--bl-bg-elevated)]/[.97] px-3 py-2 text-sm text-[var(--bl-text-secondary)] shadow-[var(--bl-shadow-lg)] backdrop-blur-[var(--bl-glass-blur)] backdrop-saturate-[var(--bl-glass-saturate)] hover:bg-[var(--bl-bg-card-hover)]"
         >
@@ -1766,21 +1847,20 @@ type AutoResp = {
   erro?: string;
 };
 
-export function Autolearn({
-  conceito,
-  livroArquivo,
-}: {
-  conceito?: string;
-  livroArquivo?: string;
-}) {
+type AutolearnProps = { conceito?: string; livroArquivo?: string };
+
+// troca de nó/livro remonta o corpo: zera estado e descarta resposta em andamento do nó antigo
+export function Autolearn(props: AutolearnProps) {
+  return <AutolearnCorpo key={JSON.stringify([props.conceito ?? null, props.livroArquivo ?? null])} {...props} />;
+}
+
+function AutolearnCorpo({ conceito, livroArquivo }: AutolearnProps) {
   const [estado, setEstado] = useState<"idle" | "carregando" | "pronto" | "erro">("idle");
   const [resp, setResp] = useState<AutoResp | null>(null);
 
   // buscas anteriores ficam SEMPRE ativas: ao abrir o nó, carrega o que já foi gerado
   useEffect(() => {
     let vivo = true;
-    setEstado("idle");
-    setResp(null);
     const qs = conceito
       ? `conceito=${encodeURIComponent(conceito)}`
       : `livroArquivo=${encodeURIComponent(livroArquivo ?? "")}`;

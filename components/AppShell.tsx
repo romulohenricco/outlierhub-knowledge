@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -78,6 +78,40 @@ function aplicarOrdemSalva(salvos: string[]): NavItem[] {
   return [...ordenado, ...faltando];
 }
 
+// Flag de hidratação: false no servidor e na hidratação, true já no cliente.
+// Nada muda depois, então a assinatura é vazia (e estável).
+const semAssinatura = () => () => {};
+const noCliente = () => true;
+const noServidor = () => false;
+
+/** Leitura única das preferências salvas (localStorage/window). Cada leitura tem
+ *  o próprio try/catch: um JSON inválido não afeta as outras. */
+function lerPreferencias(): { colapsado: boolean; recolhido: boolean; ordem: NavItem[] | null } {
+  let colapsado: boolean;
+  try {
+    const salvo = localStorage.getItem("bl-nav");
+    // ≤1023px o painel é overlay → começa colapsado (casa com o script inline)
+    const compacto = window.innerWidth <= 1023;
+    colapsado = compacto ? true : salvo === "collapsed";
+  } catch {
+    colapsado = window.innerWidth <= 1023;
+  }
+  let recolhido = false;
+  try {
+    recolhido = localStorage.getItem(CHROME_KEY) === "recolhido";
+  } catch {
+    /* ignora — começa aberto */
+  }
+  let ordem: NavItem[] | null = null;
+  try {
+    const ordemSalva = localStorage.getItem(ORDEM_KEY);
+    if (ordemSalva) ordem = aplicarOrdemSalva(JSON.parse(ordemSalva));
+  } catch {
+    /* ignora — usa a ordem canônica */
+  }
+  return { colapsado, recolhido, ordem };
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -117,27 +151,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     [buscaValor, router, fecharBusca],
   );
 
-  useEffect(() => {
-    try {
-      const salvo = localStorage.getItem("bl-nav");
-      // ≤1023px o painel é overlay → começa colapsado (casa com o script inline)
-      const compacto = window.innerWidth <= 1023;
-      setColapsado(compacto ? true : salvo === "collapsed");
-    } catch {
-      setColapsado(window.innerWidth <= 1023);
-    }
-    try {
-      setRecolhido(localStorage.getItem(CHROME_KEY) === "recolhido");
-    } catch {
-      /* ignora — começa aberto */
-    }
-    try {
-      const ordemSalva = localStorage.getItem(ORDEM_KEY);
-      if (ordemSalva) setNavOrdem(aplicarOrdemSalva(JSON.parse(ordemSalva)));
-    } catch {
-      /* ignora — usa a ordem canônica */
-    }
-  }, []);
+  // Preferências salvas entram uma única vez, após a hidratação: o primeiro render
+  // (servidor/hidratação) usa os defaults pra casar com o HTML do servidor.
+  const hidratado = useSyncExternalStore(semAssinatura, noCliente, noServidor);
+  const [prefsLidas, setPrefsLidas] = useState(false);
+  if (hidratado && !prefsLidas) {
+    setPrefsLidas(true);
+    const prefs = lerPreferencias();
+    setColapsado(prefs.colapsado);
+    setRecolhido(prefs.recolhido);
+    if (prefs.ordem) setNavOrdem(prefs.ordem);
+  }
 
   const onDragStart = useCallback(
     (href: string) => (e: React.DragEvent) => {

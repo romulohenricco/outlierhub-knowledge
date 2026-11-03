@@ -45,8 +45,8 @@ function SourceViewer({ addonId, artefatoId }: { addonId: string; artefatoId: st
   const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
-    setTexto(null);
-    setErro(false);
+    // Sem reset síncrono aqui: o estado volta a null/false porque o pai remonta
+    // este componente via key (li key={e.id} + SourceViewer key={a.id}).
     fetch(`/api/addons/${encodeURIComponent(addonId)}/artifacts/${encodeURIComponent(artefatoId)}`)
       .then((r) => (r.ok ? r.text() : Promise.reject()))
       .then(setTexto)
