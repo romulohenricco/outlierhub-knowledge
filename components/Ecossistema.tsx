@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import {
@@ -188,13 +188,14 @@ export function Ecossistema({
    *  O filtro continua rodando sobre a lista INTEIRA — o teto é só de pintura. */
   const [teto, setTeto] = useState(TETO_INICIAL);
 
-  function setVisao(v: Visao) {
+  // Identidade estável: o nó das abas (topbar) usa direto, sem ref espelhando o callback.
+  const setVisao = useCallback((v: Visao) => {
     setVisaoState(v);
     const url = new URL(window.location.href);
     if (v === "cards") url.searchParams.delete("visao");
     else url.searchParams.set("visao", v);
     window.history.replaceState(null, "", url);
-  }
+  }, []);
 
   async function copiar(texto: string, chave: string) {
     await navigator.clipboard.writeText(texto);
@@ -251,10 +252,23 @@ export function Ecossistema({
   }, [ecosystem.entities, q, kind, procedencia, uso, tag, squadId, soFavoritos, favs, verOcultos, ocultosState]);
 
   // Recorte novo, teto zerado: senão o usuário filtra 12 itens e continua vendo
-  // o "mostrar mais" de um recorte antigo.
-  useEffect(() => {
+  // o "mostrar mais" de um recorte antigo. Ajuste de estado durante o render
+  // (guarda o recorte anterior) em vez de efeito: sem frame pintado com o teto velho.
+  const recorte = { q, kind, procedencia, uso, tag, squadId, soFavoritos, verOcultos };
+  const [recorteAnterior, setRecorteAnterior] = useState(recorte);
+  if (
+    recorte.q !== recorteAnterior.q ||
+    recorte.kind !== recorteAnterior.kind ||
+    recorte.procedencia !== recorteAnterior.procedencia ||
+    recorte.uso !== recorteAnterior.uso ||
+    recorte.tag !== recorteAnterior.tag ||
+    recorte.squadId !== recorteAnterior.squadId ||
+    recorte.soFavoritos !== recorteAnterior.soFavoritos ||
+    recorte.verOcultos !== recorteAnterior.verOcultos
+  ) {
+    setRecorteAnterior(recorte);
     setTeto(TETO_INICIAL);
-  }, [q, kind, procedencia, uso, tag, squadId, soFavoritos, verOcultos]);
+  }
 
   const usoCounts = useMemo(() => {
     const c = { frequente: 0, ocasional: 0, raro: 0, "sem-sinal": 0 } as Record<EcoUsoStatus, number>;
@@ -411,8 +425,6 @@ export function Ecossistema({
   usePagePanel(painel);
 
   // abas Cards | Radial | Neural moram na topbar do app (slot usePageTopbar)
-  const visaoRef = useRef(setVisao);
-  visaoRef.current = setVisao;
   const abas = useMemo(
     () => (
       <div className="flex items-center gap-1" role="tablist" aria-label="visão do ecossistema">
@@ -421,7 +433,7 @@ export function Ecossistema({
             key={v.id}
             role="tab"
             aria-selected={visao === v.id}
-            onClick={() => visaoRef.current(v.id)}
+            onClick={() => setVisao(v.id)}
             className={`rounded-[var(--bl-radius-sm)] border px-2.5 py-1 font-mono text-[11px] transition-colors ${visao === v.id ? "border-[var(--bl-border-accent)] text-[var(--bl-accent)]" : "border-[var(--bl-border)] text-[var(--bl-text-dim)] hover:text-[var(--bl-text-secondary)]"}`}
           >
             {v.rotulo}
@@ -429,7 +441,7 @@ export function Ecossistema({
         ))}
       </div>
     ),
-    [visao],
+    [visao, setVisao],
   );
   usePageTopbar(abas);
 
