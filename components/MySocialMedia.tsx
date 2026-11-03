@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, ExternalLink, BadgeCheck, Building2 } from "lucide-react";
 import { Secao, ListaExpansivel, linhaCls, COR_CAT } from "./Filtros";
@@ -46,7 +46,17 @@ export function MySocialMedia({
 
   const PAGINA = 60;
   const [limite, setLimite] = useState(PAGINA);
-  useEffect(() => setLimite(PAGINA), [q, nichoSel, soNegocio]);
+  // Volta à primeira página quando qualquer filtro muda (ajuste durante o render,
+  // sem commit intermediário com o limite antigo). Comparação por identidade, como as deps do antigo efeito.
+  const [filtrosAnteriores, setFiltrosAnteriores] = useState({ q, nichoSel, soNegocio });
+  if (
+    filtrosAnteriores.q !== q ||
+    filtrosAnteriores.nichoSel !== nichoSel ||
+    filtrosAnteriores.soNegocio !== soNegocio
+  ) {
+    setFiltrosAnteriores({ q, nichoSel, soNegocio });
+    setLimite(PAGINA);
+  }
   const visiveis = filtrados.slice(0, limite);
 
   function toggleNicho(n: string) {
