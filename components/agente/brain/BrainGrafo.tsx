@@ -4,7 +4,7 @@
  *  organização + pilares por fonte do inventário, drill-in, lentes, legenda,
  *  diretório, busca e tela cheia. Dados vêm da page (server); o recorte do
  *  inventário chega já filtrado pela lateral do catálogo. */
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, RotateCcw, Search, X, ZoomIn, ZoomOut } from "lucide-react";
 import { usePanZoom } from "./usePanZoom";
 import { agruparPorFonte } from "@/lib/brain/fontes";
@@ -22,6 +22,28 @@ import { IconeRedondo } from "./icones";
 
 const FLUTUA = { background: "rgba(9, 9, 12, 0.88)" } as const;
 const LARG_PAINEL = 288;
+const CHAVE_PAINEL = "bl-agente-painel";
+
+/** Leitor da preferência inicial do painel (true = aberto): lê localStorage/matchMedia UMA vez por
+ *  montagem e guarda o resultado, sem assinar eventos (nem 'storage' entre abas, nem resize). */
+function criarLeitorPainelInicial() {
+  let lido: boolean | null = null;
+  return (): boolean => {
+    if (lido === null) {
+      lido = true;
+      try {
+        const salvo = localStorage.getItem(CHAVE_PAINEL);
+        // em tela estreita o painel (288px) cobriria o grafo inteiro: começa recolhido, sem sobrescrever a escolha salva
+        if (salvo === "recolhido" || (salvo === null && window.matchMedia("(max-width: 767px)").matches)) lido = false;
+      } catch {
+        /* sem storage: começa aberto */
+      }
+    }
+    return lido;
+  };
+}
+const semAssinatura = () => () => {};
+const painelNoServidor = () => true;
 const BTN =
   "flex items-center gap-1.5 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border-1)] px-2.5 py-1.5 backdrop-blur-xl font-mono text-[11px] text-[var(--bl-text-primary)] hover:border-[var(--bl-border-accent)]";
 
@@ -68,25 +90,20 @@ export function BrainGrafo({
   const [notaSel, setNotaSel] = useState<string | null>(null);
   const [cheia, setCheia] = useState(false);
   // coluna direita (lentes, legenda, diretório) flutua sobre o canvas e recolhe
-  const [painelAberto, setPainelAberto] = useState(true);
-  useEffect(() => {
+  // preferência inicial vem do storage (servidor/hidratação: aberto); a escolha do usuário vale por cima
+  const [lerPainelInicial] = useState(criarLeitorPainelInicial);
+  const painelInicial = useSyncExternalStore(semAssinatura, lerPainelInicial, painelNoServidor);
+  const [painelEscolhido, setPainelEscolhido] = useState<boolean | null>(null);
+  const painelAberto = painelEscolhido ?? painelInicial;
+  const alternarPainel = () => {
+    const novo = !painelAberto;
+    setPainelEscolhido(novo);
     try {
-      const salvo = localStorage.getItem("bl-agente-painel");
-      // em tela estreita o painel (288px) cobriria o grafo inteiro: começa recolhido, sem sobrescrever a escolha salva
-      if (salvo === "recolhido" || (salvo === null && window.matchMedia("(max-width: 767px)").matches)) setPainelAberto(false);
+      localStorage.setItem(CHAVE_PAINEL, novo ? "aberto" : "recolhido");
     } catch {
-      /* sem storage: começa aberto */
+      /* ignora */
     }
-  }, []);
-  const alternarPainel = () =>
-    setPainelAberto((a) => {
-      try {
-        localStorage.setItem("bl-agente-painel", a ? "recolhido" : "aberto");
-      } catch {
-        /* ignora */
-      }
-      return !a;
-    });
+  };
   const caixa = useRef<HTMLDivElement>(null);
   const busca = useRef<HTMLInputElement>(null);
   // zoom/pan de cada visão: a mesma tela, duas áreas; cada uma guarda a sua vista
@@ -94,8 +111,8 @@ export function BrainGrafo({
   const [kNeural, setKNeural] = useState(1);
   const panRadial = usePanZoom(setKRadial);
   const panNeural = usePanZoom(setKNeural);
-  const { zoomar: zoomRadial, resetar: resetRadial } = panRadial;
-  const { zoomar: zoomNeural, resetar: resetNeural } = panNeural;
+  const { zoomar: zoomRadial, resetar: resetRadial, vistaRef: vistaRadial, conteudoRef: conteudoRadial, bindings: bindRadial, clique: cliqueRadial } = panRadial;
+  const { zoomar: zoomNeural, resetar: resetNeural, vistaRef: vistaNeural, conteudoRef: conteudoNeural, bindings: bindNeural, clique: cliqueNeural } = panNeural;
   const kAtivo = visao === "radial" ? kRadial : kNeural;
   const zoomAtivo = visao === "radial" ? zoomRadial : zoomNeural;
   const resetAtivo = visao === "radial" ? resetRadial : resetNeural;
@@ -282,14 +299,14 @@ export function BrainGrafo({
           />
           {/* área do canvas: recorta o zoom e captura arrasto/roda; o conteúdo é o que anda e escala */}
           <div
-            ref={panRadial.vistaRef}
-            {...panRadial.bindings}
-            onClickCapture={panRadial.clique}
+            ref={vistaRadial}
+            {...bindRadial}
+            onClickCapture={cliqueRadial}
             className="absolute touch-none select-none overflow-hidden transition-[left,top,width,height] duration-300"
             style={{ left: "var(--g-esq)", top: `calc(var(--g-topo) + ${alturaBarra}px)`, width: `calc(100% - var(--g-esq) - ${direita}px)`, height: `calc(100% - var(--g-topo) - ${alturaBarra}px)`, cursor: "grab" }}
             data-testid="grafo-radial-area"
           >
-            <div ref={panRadial.conteudoRef} className="absolute inset-0 origin-[0_0] will-change-transform" data-testid="grafo-radial-conteudo">
+            <div ref={conteudoRadial} className="absolute inset-0 origin-[0_0] will-change-transform" data-testid="grafo-radial-conteudo">
               <svg
                 key={notasAbertas && mem ? "notas" : "cena"}
                 viewBox={notasAbertas && mem ? "-500 -480 1000 960" : VIEWBOX_CENA}
@@ -335,14 +352,14 @@ export function BrainGrafo({
 
       {visao === "neural" && (
         <div
-          ref={panNeural.vistaRef}
-          {...panNeural.bindings}
-          onClickCapture={panNeural.clique}
+          ref={vistaNeural}
+          {...bindNeural}
+          onClickCapture={cliqueNeural}
           className="absolute touch-none select-none overflow-hidden transition-[left,top,right] duration-300"
           style={{ left: "var(--g-esq)", top: `calc(var(--g-topo) + ${alturaBarra}px)`, right: direita, bottom: 0, cursor: "grab" }}
           data-testid="grafo-neural-area"
         >
-          <div ref={panNeural.conteudoRef} className="mx-auto w-full max-w-[1100px] origin-[0_0] will-change-transform" data-testid="grafo-neural-conteudo">
+          <div ref={conteudoNeural} className="mx-auto w-full max-w-[1100px] origin-[0_0] will-change-transform" data-testid="grafo-neural-conteudo">
             <NeuralView dados={neural} />
           </div>
         </div>
