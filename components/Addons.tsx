@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect, type ComponentType } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CampoBusca } from "@/components/CampoBusca";
 import { Check, Copy, Lock, Package, Search } from "lucide-react";
 import {
   AREAS_BOS,
@@ -124,10 +125,10 @@ export function Addons({ catalogo }: { catalogo: AddonCatalogo }) {
           <label htmlFor="addons-busca" className="sr-only">
             Buscar add-ons
           </label>
-          <input
+          <CampoBusca
             id="addons-busca"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            valor={q}
+            aoMudar={setQ}
             placeholder="buscar add-ons…"
             className="min-h-11 w-full rounded-lg border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-sm text-white/90 outline-none focus-visible:border-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/50"
           />
