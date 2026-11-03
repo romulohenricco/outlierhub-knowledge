@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { BRAIN_VAZIO, type BrainDados } from "@/lib/brain/tipos";
 import type { EcoEntity, EcoKind, EcoProcedencia, EcoUsoStatus, Ecosystem } from "@/lib/types";
+import { CampoBusca } from "./CampoBusca";
 import { Secao } from "./Filtros";
 import { usePagePanel } from "./PagePanel";
 import { usePageTopbar } from "./PageTopbar";
@@ -295,9 +296,9 @@ export function Ecossistema({
       <>
         <div className="relative mb-4">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-white/30" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+          <CampoBusca
+            valor={q}
+            aoMudar={setQ}
             placeholder="filtrar por nome, id, descrição ou path…"
             className="w-full rounded-[var(--bl-radius-sm)] bg-[var(--bl-bg-input)] py-1.5 pl-8 pr-2 text-sm outline-none ring-1 ring-[var(--bl-border)] placeholder:text-white/25 focus:ring-[var(--bl-border-accent)]"
           />
