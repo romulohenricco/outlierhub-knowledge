@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import {
   Geist,
-  Geist_Mono,
   Inter,
   JetBrains_Mono,
   IBM_Plex_Mono,
 } from "next/font/google";
+/** Geist Mono vem do pacote oficial `geist` (arquivo local), não do next/font/google: o Google
+ *  passou a servi-la por URLs `/l/font?kit=…&skey=…`, que o Turbopack não resolve (500 em toda página). */
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 import { PagePanelProvider } from "@/components/PagePanel";
@@ -18,12 +20,6 @@ const geist = Geist({
   subsets: ["latin"],
   variable: "--font-geist",
   weight: ["300", "400", "500", "600"],
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-  weight: ["400", "500"],
 });
 
 const inter = Inter({
@@ -73,7 +69,7 @@ export default async function RootLayout({
       lang="pt-BR"
       data-theme="bos"
       suppressHydrationWarning
-      className={`${geist.variable} ${geistMono.variable} ${inter.variable} ${jetbrainsMono.variable} ${ibmPlexMono.variable}`}
+      className={`${geist.variable} ${GeistMono.variable} ${inter.variable} ${jetbrainsMono.variable} ${ibmPlexMono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
