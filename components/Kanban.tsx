@@ -348,6 +348,34 @@ function aplicarOrdemSecoes(salvo: string[]): string[] {
   return [...ordenado, ...faltando];
 }
 
+type PosicaoModal = "centro" | "esquerda" | "direita";
+
+/** Posição salva do modal de ticket (localStorage). Só é consumida dentro do
+ *  modal, que nunca está aberto na hidratação — sem risco de mismatch. */
+function lerPosicaoModalSalva(): PosicaoModal {
+  if (typeof window === "undefined") return "centro";
+  try {
+    const salvo = localStorage.getItem("bl-kanban-modal-pos");
+    if (salvo === "esquerda" || salvo === "direita" || salvo === "centro") return salvo;
+  } catch {
+    /* ignora — usa centro */
+  }
+  return "centro";
+}
+
+/** Ordem salva das seções do painel de filtros (localStorage); só vai ao
+ *  painel via efeito de usePagePanel, nunca ao HTML do servidor. */
+function lerOrdemSecoesSalva(): string[] {
+  if (typeof window === "undefined") return SECOES_FILTRO_DEFAULT;
+  try {
+    const salvo = localStorage.getItem(SECOES_FILTRO_KEY);
+    if (salvo) return aplicarOrdemSecoes(JSON.parse(salvo));
+  } catch {
+    /* ignora — usa a ordem canônica */
+  }
+  return SECOES_FILTRO_DEFAULT;
+}
+
 /** Concatena o prompt autocontido de cada ticket filtrado num único bloco pra
  *  colar no terminal e mandar rodar em lote (ex.: de madrugada). */
 function construirPromptLote(cards: KanbanCard[], criterios: string[]): string {
@@ -369,6 +397,16 @@ const LOTE_PRESETS = [10, 20, 30, 40];
 // Texto copiado a partir daqui já entra no toast com contagem de
 // grande, sem virar ruído pra cópia de 1 ticket só).
 const AVISO_TAMANHO_A_PARTIR_DE = 1500;
+
+/** Posição `fixed` do MenuQuantidade, alinhada à direita do botão que abriu
+ *  (largura fixa de 260px, presa às bordas da janela). */
+function posicionarDropdown(anchorEl: HTMLElement): { top: number; left: number } | null {
+  if (typeof window === "undefined") return null;
+  const DROPDOWN_W = 260;
+  const rect = anchorEl.getBoundingClientRect();
+  const left = Math.min(window.innerWidth - DROPDOWN_W - 8, Math.max(8, rect.right - DROPDOWN_W));
+  return { top: rect.bottom + 8, left };
+}
 
 /** Menu de "quantos tickets copiar" — usado tanto pelo botão de coluna quanto
  *  pelo botão global do topo. Atalhos + campo pra digitar um número
@@ -397,14 +435,9 @@ function MenuQuantidade({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [customizado, setCustomizado] = useState("");
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
-
-  useEffect(() => {
-    const DROPDOWN_W = 260;
-    const rect = anchorEl.getBoundingClientRect();
-    const left = Math.min(window.innerWidth - DROPDOWN_W - 8, Math.max(8, rect.right - DROPDOWN_W));
-    setPos({ top: rect.bottom + 8, left });
-  }, [anchorEl]);
+  // Posição calculada uma única vez no mount (lê o layout pré-commit: o botão
+  // âncora não muda de geometria ao abrir o menu).
+  const [pos] = useState<{ top: number; left: number } | null>(() => posicionarDropdown(anchorEl));
 
   useEffect(() => {
     const fecha = (e: MouseEvent) => {
@@ -549,7 +582,7 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
   const [dragOverColuna, setDragOverColuna] = useState<string | null>(null);
   const [novaColunaAberta, setNovaColunaAberta] = useState(false);
 
-  const [secoesOrdem, setSecoesOrdem] = useState<string[]>(SECOES_FILTRO_DEFAULT);
+  const [secoesOrdem, setSecoesOrdem] = useState<string[]>(lerOrdemSecoesSalva);
   const arrastandoSecao = useRef<string | null>(null);
   const [dragOverSecao, setDragOverSecao] = useState<string | null>(null);
   const [novaColunaTexto, setNovaColunaTexto] = useState("");
@@ -557,32 +590,14 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
   const [edicaoColunaTexto, setEdicaoColunaTexto] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const erroTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [posicao, setPosicao] = useState<"centro" | "esquerda" | "direita">("centro");
+  const [posicao, setPosicao] = useState<PosicaoModal>(lerPosicaoModalSalva);
 
-  useEffect(() => {
-    try {
-      const salvo = localStorage.getItem("bl-kanban-modal-pos");
-      if (salvo === "esquerda" || salvo === "direita" || salvo === "centro") setPosicao(salvo);
-    } catch {
-      /* ignora — usa centro */
-    }
-  }, []);
-
-  const mudarPosicao = useCallback((p: "centro" | "esquerda" | "direita") => {
+  const mudarPosicao = useCallback((p: PosicaoModal) => {
     setPosicao(p);
     try {
       localStorage.setItem("bl-kanban-modal-pos", p);
     } catch {
       /* ignora */
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      const salvo = localStorage.getItem(SECOES_FILTRO_KEY);
-      if (salvo) setSecoesOrdem(aplicarOrdemSecoes(JSON.parse(salvo)));
-    } catch {
-      /* ignora — usa a ordem canônica */
     }
   }, []);
 
@@ -639,9 +654,16 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
   // card concluído — opt-in, nunca captura automático.
   const aprendizadoCardId = draft?.id;
   const aprendizadoColuna = draft?.coluna;
-  useEffect(() => {
+  // Zera texto/salvo ao trocar de card ou coluna — ajuste durante o render, para
+  // o texto do card anterior nunca ser pintado.
+  const chaveAprendizado = JSON.stringify([aprendizadoCardId ?? null, aprendizadoColuna ?? null]);
+  const [chaveAprendizadoAnterior, setChaveAprendizadoAnterior] = useState(chaveAprendizado);
+  if (chaveAprendizado !== chaveAprendizadoAnterior) {
+    setChaveAprendizadoAnterior(chaveAprendizado);
     setAprendizadoTexto("");
     setAprendizadoSalvo(false);
+  }
+  useEffect(() => {
     if (!aprendizadoCardId || aprendizadoColuna !== "done") return;
     let cancelado = false;
     fetch(`/api/kanban/${aprendizadoCardId}/aprendizado`)
@@ -1261,7 +1283,7 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
     [cardsFiltrados, board.cards, criteriosAtivos, copiarELocalizar],
   );
 
-  const secoesMapa: Record<string, React.ReactNode> = {
+  const secoesMapa = useMemo<Record<string, React.ReactNode>>(() => ({
     execucao: (
       <Secao titulo="execução" sub="quem roda o ticket" cor="#38bdf8" corRgb="56,189,248" defaultAberto>
         {(Object.keys(EXECUCAO_INFO) as KanbanExecucaoFiltro[]).map((modo) => {
@@ -1379,7 +1401,20 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
         ))}
       </Secao>
     ),
-  };
+  }), [
+    filtroTipo,
+    filtroPrioridade,
+    filtroProjeto,
+    filtroResponsavel,
+    filtroTags,
+    filtroCanal,
+    filtroDataDe,
+    filtroDataAte,
+    filtroExecucao,
+    responsaveis,
+    tagsDisponiveis,
+    contagens,
+  ]);
 
   const painel = useMemo(
     () => (
@@ -1418,23 +1453,7 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
         )}
       </>
     ),
-    [
-      filtroTipo,
-      filtroPrioridade,
-      filtroProjeto,
-      filtroResponsavel,
-      filtroTags,
-      filtroCanal,
-      filtroDataDe,
-      filtroDataAte,
-      filtroExecucao,
-      responsaveis,
-      tagsDisponiveis,
-      contagens,
-      temFiltro,
-      secoesOrdem,
-      dragOverSecao,
-    ],
+    [secoesMapa, temFiltro, secoesOrdem, dragOverSecao, onDragStartSecao, onDragOverSecao, onDropSecao, onDragEndSecao],
   );
   usePagePanel(painel);
 
