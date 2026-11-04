@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { LiveOrb } from "./LiveOrb";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Library,
@@ -288,7 +289,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         aria-expanded={!recolhido}
         title={recolhido ? "mostrar menus (⌘. / Ctrl+.)" : "recolher menus — fica só o orb (⌘. / Ctrl+.)"}
       >
-        <span className="logo-orb" />
+        <LiveOrb size={26} variant="white" mouth />
       </button>
 
       {/* ── Topbar (marca + ações globais) ── */}
