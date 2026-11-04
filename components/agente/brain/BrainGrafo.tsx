@@ -19,10 +19,12 @@ import { Painel, PainelNota } from "./Painel";
 import { NotasZoom } from "./Radial";
 import { AnelGuia, CenaGrafo, VIEWBOX_CENA, cenaFocoAlvo, cenaGeralAlvo } from "./Cena";
 import { IconeRedondo } from "./icones";
+import { CampoBusca } from "@/components/CampoBusca";
 
 const FLUTUA = { background: "rgba(9, 9, 12, 0.88)" } as const;
 const LARG_PAINEL = 288;
 const CHAVE_PAINEL = "bl-agente-painel";
+const ID_BUSCA = "brain-busca";
 
 /** Leitor da preferência inicial do painel (true = aberto): lê localStorage/matchMedia UMA vez por
  *  montagem e guarda o resultado, sem assinar eventos (nem 'storage' entre abas, nem resize). */
@@ -84,6 +86,20 @@ export function BrainGrafo({
   const [ocultos, setOcultos] = useState<Set<string>>(() => new Set());
   const toggleCamada = useCallback((id: string) => setOcultos((o) => { const n = new Set(o); if (n.has(id)) n.delete(id); else n.add(id); return n; }), []);
   const [q, setQ] = useState("");
+  // limpar o campo por fora (Esc, ir a um resultado): remonta o CampoBusca em vez de depender do eco de q
+  const [chaveBusca, setChaveBusca] = useState(0);
+  const descartarBusca = useRef(false);
+  const aoMudarBusca = useCallback((texto: string) => {
+    if (!descartarBusca.current) setQ(texto);
+  }, []);
+  const limparBusca = useCallback(() => {
+    descartarBusca.current = true; // o descarregar da desmontagem não pode devolver o texto velho
+    setQ("");
+    setChaveBusca((c) => c + 1);
+  }, []);
+  useEffect(() => {
+    descartarBusca.current = false;
+  }, [chaveBusca]);
   const [notaDestaque, setNotaDestaque] = useState<string | null>(null);
   // núcleo de notas aberto em tela cheia (constelação) e a nota escolhida dentro dele
   const [notasAbertas, setNotasAbertas] = useState(false);
@@ -105,7 +121,6 @@ export function BrainGrafo({
     }
   };
   const caixa = useRef<HTMLDivElement>(null);
-  const busca = useRef<HTMLInputElement>(null);
   // zoom/pan de cada visão: a mesma tela, duas áreas; cada uma guarda a sua vista
   const [kRadial, setKRadial] = useState(1);
   const [kNeural, setKNeural] = useState(1);
@@ -157,7 +172,7 @@ export function BrainGrafo({
 
   const irPara = useCallback(
     (i: Item) => {
-      setQ("");
+      limparBusca();
       if (i.tipo === "nota") {
         setFoco(null);
         setSelId(null);
@@ -168,8 +183,15 @@ export function BrainGrafo({
       if (i.pilarId) setFoco(i.pilarId);
       setSelId(i.tipo === "pilar" ? null : i.id);
     },
-    [],
+    [limparBusca],
   );
+
+  // estável: derrotava o memo de CenaGrafo e refazia o SVG inteiro a cada tecla
+  const abrirNotas = useCallback(() => {
+    setNotasAbertas(true);
+    setFoco(null);
+    setSelId(null);
+  }, []);
 
   const aoNo = useCallback(
     (n: NoCena) => {
@@ -202,7 +224,7 @@ export function BrainGrafo({
       const digitando = alvo && (alvo.tagName === "INPUT" || alvo.tagName === "SELECT" || alvo.tagName === "TEXTAREA");
       if (e.key === "/" && !digitando && visao === "radial") {
         e.preventDefault();
-        busca.current?.focus();
+        document.getElementById(ID_BUSCA)?.focus();
       } else if (e.key === "Escape" && !digitando) {
         if (cheia && !document.fullscreenElement) setCheia(false);
         else if (notaSel) setNotaSel(null);
@@ -323,7 +345,7 @@ export function BrainGrafo({
                 ) : (
                   <>
                     <AnelGuia />
-                    <CenaGrafo alvo={alvo} c={comum} mem={mem} onNotas={() => { setNotasAbertas(true); setFoco(null); setSelId(null); }} pilarFocoId={pilarFoco?.id ?? null} />
+                    <CenaGrafo alvo={alvo} c={comum} mem={mem} onNotas={abrirNotas} pilarFocoId={pilarFoco?.id ?? null} />
                   </>
                 )}
               </svg>
@@ -450,15 +472,19 @@ export function BrainGrafo({
             <div className="pointer-events-auto relative">
               <label className="flex items-center gap-2 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border-1)] px-2.5 py-1.5 font-mono text-[11px] text-[var(--bl-text-dim)] backdrop-blur-xl" style={FLUTUA}>
                 <Search size={12} />
-                <input
-                  ref={busca}
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
+                <CampoBusca
+                  key={chaveBusca}
+                  id={ID_BUSCA}
+                  valor={q}
+                  aoMudar={aoMudarBusca}
+                  aoEnviar={(texto) => {
+                    const primeiro = buscar(indice, texto)[0];
+                    if (primeiro) irPara(primeiro);
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && resultados[0]) irPara(resultados[0]);
                     if (e.key === "Escape") {
-                      setQ("");
-                      busca.current?.blur();
+                      limparBusca();
+                      e.currentTarget.blur();
                     }
                   }}
                   placeholder="buscar nota ou nó…"

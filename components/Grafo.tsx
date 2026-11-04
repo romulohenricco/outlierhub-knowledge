@@ -23,6 +23,7 @@ import { PROCEDENCIA_ORDEM } from "@/lib/ecosystem-graph";
 import { COR_KIND } from "@/components/agente/meta";
 import type { EcoKind } from "@/lib/types";
 import { useToast } from "@/components/Toast";
+import { CampoBusca } from "@/components/CampoBusca";
 import dynamic from "next/dynamic";
 import { urlHttp } from "@/lib/social-url";
 import type {
@@ -767,7 +768,7 @@ export function Grafo() {
     setTimeout(() => fgRef.current?.zoom(3, 800), 700);
   }, [pedidoFoco, mostrarToast, carregarMetaLivro]);
 
-  /* ── busca de nó ── */
+  /* ── busca de nó ── (o termo chega do CampoBusca só depois da pausa, em transição) ── */
   const resultadosBusca = useMemo(() => {
     const q = busca.trim().toLowerCase();
     if (q.length < 2) return [];
@@ -1118,9 +1119,9 @@ export function Grafo() {
             {rotulos ? "A" : "A̶"} rótulos
           </button>
           <div className="relative ml-auto">
-            <input
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+            <CampoBusca
+              valor={busca}
+              aoMudar={setBusca}
               placeholder="achar nó…"
               className="w-44 rounded-[var(--bl-radius-sm)] border border-[var(--bl-border)] bg-[var(--bl-bg-input)] px-3 py-1.5 outline-none placeholder:text-[var(--bl-text-muted)] focus:border-[var(--bl-border-accent)]"
             />

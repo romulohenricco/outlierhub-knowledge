@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, ExternalLink, BadgeCheck, Building2 } from "lucide-react";
 import { Secao, ListaExpansivel, linhaCls, COR_CAT } from "./Filtros";
+import { CampoBusca } from "./CampoBusca";
 import { usePagePanel } from "./PagePanel";
 import { SocialVazio } from "./SocialVazio";
 import type { ContaSocial, ProgressoSocial } from "@/lib/social";
@@ -68,9 +69,9 @@ export function MySocialMedia({
       <>
         <div className="relative mb-4">
           <Search className="absolute left-2 top-2 h-4 w-4 text-white/30" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+          <CampoBusca
+            valor={q}
+            aoMudar={setQ}
             placeholder="filtrar…"
             className="w-full rounded-[var(--bl-radius-sm)] bg-[var(--bl-bg-input)] py-1.5 pl-8 pr-2 text-sm outline-none ring-1 ring-[var(--bl-border)] placeholder:text-white/25 focus:ring-[var(--bl-border-accent)]"
           />

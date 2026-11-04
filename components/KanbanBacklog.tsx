@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, ChevronRight, Copy, Check, X, Clock } from "lucide-react";
 import { Secao, ListaExpansivel, linhaCls } from "./Filtros";
 import { usePagePanel } from "./PagePanel";
+import { CampoBusca } from "./CampoBusca";
 import {
   CANAL_INFO,
   EXECUCAO_INFO,
@@ -314,9 +315,9 @@ export function KanbanBacklog({ board: boardInicial }: { board: KanbanBoard }) {
       <div className="mb-3 flex items-center gap-2">
         <div className="relative flex-1">
           <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--bl-text-dim)]" />
-          <input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+          <CampoBusca
+            valor={busca}
+            aoMudar={setBusca}
             placeholder="buscar por id, título, descrição, tag, responsável…"
             className="bl-input w-full pl-8"
           />

@@ -55,6 +55,7 @@ import {
   TIPO_INFO,
   type KanbanExecucaoFiltro,
 } from "./kanbanInfo";
+import { CampoBusca } from "./CampoBusca";
 import { usePagePanel } from "./PagePanel";
 import { useToast } from "./Toast";
 import { estimarTokens, ordenarParaLote } from "@/lib/kanbanLote";
@@ -106,6 +107,9 @@ const MODAL_COMPACT_STYLE = {
   ...COMPACT_SCALE_STYLE,
   zIndex: "var(--bl-z-modal)",
 } as unknown as React.CSSProperties;
+
+// a busca de vínculos só roda no Enter/lupa: a pausa da digitação não re-renderiza o board
+function ignorarPausaBusca() {}
 
 /** Texto pra colar direto no terminal e já começar o ticket numa sessão nova —
  *  botão "copiar" no card (1 ticket por sessão, dentro do orçamento de
@@ -1060,22 +1064,40 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
   const [buscandoVinculo, setBuscandoVinculo] = useState(false);
   const [selecaoVinculo, setSelecaoVinculo] = useState<Set<string>>(new Set());
 
-  const buscarVinculos = useCallback(async () => {
-    if (!buscaVinculo.trim()) return;
-    setBuscandoVinculo(true);
-    try {
-      const r = await fetch("/api/search", { method: "POST", body: JSON.stringify({ query: buscaVinculo }) });
-      const j = await r.json();
-      if (j.ok) {
-        setResultadosVinculo(j.hits);
-        setSelecaoVinculo(new Set());
-      } else {
-        avisar(j.erro === "ollama-offline" ? "busca semântica offline (Ollama)" : "busca falhou");
+  // linha do campo: a lupa lê o texto direto do <input>, sem depender de estado do pai nem de transição
+  const linhaBuscaVinculoRef = useRef<HTMLDivElement>(null);
+
+  // recebe o termo por parâmetro: Enter e lupa mandam o texto atual do campo
+  const buscarVinculos = useCallback(
+    async (termo: string) => {
+      if (!termo.trim()) return;
+      setBuscandoVinculo(true);
+      try {
+        const r = await fetch("/api/search", { method: "POST", body: JSON.stringify({ query: termo }) });
+        const j = await r.json();
+        if (j.ok) {
+          setResultadosVinculo(j.hits);
+          setSelecaoVinculo(new Set());
+        } else {
+          avisar(j.erro === "ollama-offline" ? "busca semântica offline (Ollama)" : "busca falhou");
+        }
+      } catch {
+        avisar("busca falhou");
+      } finally {
+        setBuscandoVinculo(false);
       }
-    } finally {
-      setBuscandoVinculo(false);
-    }
-  }, [buscaVinculo, avisar]);
+    },
+    [avisar],
+  );
+
+  // grava o termo buscado (só no Enter/lupa, não a cada pausa) e dispara a busca
+  const enviarBuscaVinculo = useCallback(
+    (termo: string) => {
+      setBuscaVinculo(termo);
+      void buscarVinculos(termo);
+    },
+    [buscarVinculos],
+  );
 
   const vincularSelecionados = useCallback(() => {
     if (!draft) return;
@@ -2174,22 +2196,21 @@ export function Kanban({ board: boardInicial }: { board: KanbanBoard }) {
                   ))}
                 </div>
               )}
-              <div className="flex gap-1">
-                <input
-                  value={buscaVinculo}
-                  onChange={(e) => setBuscaVinculo(e.target.value)}
+              <div className="flex gap-1" ref={linhaBuscaVinculoRef}>
+                <CampoBusca
+                  valor={buscaVinculo}
+                  aoMudar={ignorarPausaBusca}
+                  aoEnviar={enviarBuscaVinculo}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      void buscarVinculos();
-                    }
+                    // Enter busca; não deixa o modal tratar a tecla
+                    if (e.key === "Enter") e.preventDefault();
                   }}
                   placeholder="buscar no acervo…"
                   className="bl-input flex-1"
                 />
                 <button
                   type="button"
-                  onClick={buscarVinculos}
+                  onClick={() => enviarBuscaVinculo(linhaBuscaVinculoRef.current?.querySelector("input")?.value ?? "")}
                   disabled={buscandoVinculo}
                   className="bl-kanban-col-btn shrink-0"
                   title="buscar"
