@@ -24,7 +24,7 @@
     "geist": "^1.9.2",
     "jose": "^6.2.14",
     "js-yaml": "^5.2.2",
-    "lucide-react": "^1.65.0",
+    "lucide-react": "^1.70.0",
     "next": "^16.4.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
