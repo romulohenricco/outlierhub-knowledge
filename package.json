@@ -18,7 +18,7 @@
     "node": ">=22.13.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/supabase-js": "^2.119.0",
     "clsx": "^2.1.1",
     "d3-force": "^3.0.1",
     "geist": "^1.9.2",
