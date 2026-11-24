@@ -30,7 +30,7 @@
     "react-dom": "19.3.1",
     "react-force-graph-2d": "^1.29.1",
     "server-only": "^0.0.1",
-    "tailwind-merge": "^3.0.0"
+    "tailwind-merge": "^3.7.1"
   },
   "devDependencies": {
     "@types/d3-force": "^3.0.10",
